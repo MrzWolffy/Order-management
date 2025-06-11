@@ -8,26 +8,40 @@ function App() {
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+      <form>
+        <input type="text" placeholder='Name product' name='search' className='search-box' />
+      </form>
+      <br />
+      <div className="product-container"></div>
+      <br />
+      <form>
+      <fieldset className='name-container'>
+          <legend>Customer name</legend>
+          <input type="text" placeholder='Name' />
+          <input type="text" placeholder='SureName' />
+        </fieldset>
+      <fieldset className='address-container'>
+          <legend>Address</legend>
+          <input type="text" placeholder='Street' />
+          <input type="text" placeholder='City' />
+          <input type="text" placeholder='State/province/area' />
+          <input type="text" placeholder='Zip code' />
+        </fieldset>
+        
+      </form>
+      <button>Confirm Order</button>
+      <br />
+      <div className="copy-wrapper">
+<div className="text-copy-box">
+
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
+      <button>Copy Text</button>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      
+      <br />
+      <br />
+      {/* <button>Payment Success</button> */}
+      <button>Clear</button>
     </>
   )
 }

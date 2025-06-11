@@ -40,3 +40,54 @@
 .read-the-docs {
   color: #888;
 }
+
+.search-box {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 70%;
+  margin: 1em 1em;
+  padding: 1em;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.name-container,
+.address-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.name-container legend,
+.address-container legend {
+  padding: 0 10px;
+  font-weight: bold;
+}
+
+.name-container input,
+.address-container input {
+  margin: 5px;
+}
+
+.copy-wrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.text-copy-box {
+  width: 150px;
+  height: 100px;
+  margin: 1em;
+  padding: 2em;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
