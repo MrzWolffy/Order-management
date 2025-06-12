@@ -91,3 +91,10 @@
   border-radius: 8px;
   background-color: #f9f9f9;
 }
+
+.navigateButtons {
+  position: absolute;
+  top: 16px;
+  left: auto;
+  right: 16px;
+}

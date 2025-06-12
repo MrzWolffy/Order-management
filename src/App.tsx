@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
 import "./App.css";
-import { useSheetApi } from "./sheetApi";
+import { useSheetApi } from "./Api/sheetApi";
+import { StatusPage } from "./StatusPage";
+import { BrowserRouter as Router, Route, Routes, useNavigate } from "react-router-dom";
 
 function App() {
-  const [count, setCount] = useState(0);
-  const { sheetData, readSheetData, loading , handleAuthClick} = useSheetApi();
+  const { sheetData, readSheetData , handleAuthClick} = useSheetApi();
   const [search, setSearch] = useState("");
   const [filteredRows, setFilteredRows] = useState<string[][]>([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!sheetData?.values) return;
@@ -28,6 +28,7 @@ function App() {
 
   return (
     <>
+    <button onClick={() => navigate("/status")} className="navigateButtons">Status</button>
     <button onClick={handleAuthClick} className="auth-button">
       Authorize
     </button>
