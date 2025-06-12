@@ -33,14 +33,6 @@
   }
 }
 
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
-}
-
 .search-box {
   flex-direction: column;
   align-items: center;
@@ -75,6 +67,124 @@
   margin: 5px;
 }
 
+.search-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  width: 100%;
+}
+
+.street-input {
+  height: 5em;
+  width: 53%;
+  text-align: left;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-x: auto;
+  resize: vertical;
+}
+
+.search-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  width: 100%;
+}
+
+.search-box {
+  width: 70%;
+  margin: 1em 1em;
+  padding: 1em;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.dropdown {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  position: absolute;
+  top: 100%;
+  width: auto; /* allow content width */
+  max-width: 90vw; /* prevent overflow */
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: white;
+  z-index: 1000;
+  white-space: nowrap;
+}
+
+.dropdown li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  gap: 1em;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.dropdown li:hover {
+  background-color: #f0f0f0;
+}
+
+.product-container {
+  margin-top: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px;
+}
+
+.product-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f9f9f9;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}
+
+.product-name {
+  flex: 1;
+  font-weight: 500;
+  color: #333;
+}
+
+.product-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.product-qty {
+  font-weight: bold;
+  color: #444;
+}
+
+.delete-button {
+  background: transparent;
+  border: none;
+  color: red;
+  font-size: 1em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5em;
+  margin: auto;
+}
+
+.delete-button:hover {
+  background-color: transparent;
+  color: darkred;
+}
+
 .copy-wrapper {
   display: flex;
   flex-direction: row;
@@ -84,10 +194,21 @@
 
 .text-copy-box {
   width: 150px;
-  height: 100px;
+  height: 100%;
   margin: 1em;
   padding: 2em;
   border: 1px solid #ccc;
   border-radius: 8px;
   background-color: #f9f9f9;
+  text-align: left;
+}
+
+.text-copy-box pre {
+  margin: 0;
+  padding: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
 }
