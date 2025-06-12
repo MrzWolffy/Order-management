@@ -5,6 +5,12 @@
   text-align: center;
 }
 
+.auth-section {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
 .logo {
   height: 1em;
   will-change: filter;

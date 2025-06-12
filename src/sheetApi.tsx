@@ -140,6 +140,7 @@ const handleAuthClick = useCallback(() => {
       setAuthStatus("Signed out");
       setSheetData(null);
       setStatus("");
+      setStatus("Logged out successfully");
     }
   }, []);
 
@@ -380,7 +381,9 @@ const handleAuthClick = useCallback(() => {
     readSheetData,
     loading,
     handleAuthClick,
+    handleSignoutClick,
     updateProductQuantities,
-    status
+    status,
+    isAuthorized,
   }
 }

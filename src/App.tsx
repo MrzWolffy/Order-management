@@ -9,7 +9,7 @@ type ProductMap = {
 };
 
 function App() {
-  const { sheetData, readSheetData, loading, handleAuthClick, updateProductQuantities, status } = useSheetApi();
+  const { sheetData, readSheetData, loading, handleAuthClick, handleSignoutClick, updateProductQuantities, isAuthorized } = useSheetApi();
   const [search, setSearch] = useState("");
   const [filteredRows, setFilteredRows] = useState<string[][]>([]);
   const [selectedProducts, setSelectedProducts] = useState<ProductMap>({});
@@ -176,16 +176,24 @@ function App() {
 
   return (
     <div className="container">
-      <button onClick={handleAuthClick} className="auth-btn">
-        <img src={googleLogo} className="logo" alt="Google logo" />
-        Google
-      </button>
-
-      {status && (
-        <div className="status-message">
-          Status: {status}
-        </div>
-      )}
+      <div className="auth-section">
+        {!isAuthorized ? (
+          <button onClick={handleAuthClick} className="auth-btn">
+            <img src={googleLogo} className="logo" alt="Google logo" />
+            Google Login
+          </button>
+        ) : (
+          <>
+            <button 
+              onClick={handleSignoutClick} 
+              className="auth-btn" 
+              style={{ backgroundColor: '#dc3545', color: 'white' }}
+            >
+              Logout
+            </button>
+          </>
+        )}
+      </div>
       <form onSubmit={(e) => e.preventDefault()} className="search-form">
         <div className="search-wrapper">
           <input
@@ -278,7 +286,7 @@ function App() {
         <fieldset className="name-container">
           <legend>Customer name</legend>
           <input type="text" placeholder="Name" ref={nameRef} />
-          <input type="text" placeholder="SureName" ref={surnameRef} />
+          <input type="text" placeholder="SurName" ref={surnameRef} />
         </fieldset>
         <fieldset className="address-container">
           <legend>Address</legend>
