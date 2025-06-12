@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import "./App.css";
+import googleLogo from "./assets/icons8-google.svg";
 import Close from "@mui/icons-material/Close";
 import { useSheetApi } from "./sheetApi";
 
@@ -8,11 +9,12 @@ type ProductMap = {
 };
 
 function App() {
-  const { sheetData, readSheetData, loading, handleAuthClick } = useSheetApi();
+  const { sheetData, readSheetData, loading, handleAuthClick, updateProductQuantities, status } = useSheetApi();
   const [search, setSearch] = useState("");
   const [filteredRows, setFilteredRows] = useState<string[][]>([]);
   const [selectedProducts, setSelectedProducts] = useState<ProductMap>({});
   const [summaryText, setSummaryText] = useState("");
+  const [isProcessingOrder, setIsProcessingOrder] = useState(false);
 
   const nameRef = useRef<HTMLInputElement>(null);
   const surnameRef = useRef<HTMLInputElement>(null);
@@ -29,12 +31,19 @@ function App() {
     }
     const rows = sheetData.values
       .slice(1)
-      .filter((row) =>
-        row.some(
+      .filter((row) => {
+        // First check if row matches search
+        const matchesSearch = row.some(
           (cell) => cell && cell.toLowerCase().includes(search.toLowerCase())
-        )
-      )
-      .map((row) => [row[0], row[1], row[3]]);
+        );
+        
+        // Then check if product has stock (assuming stock is in column index 4, which is row[4])
+        const currentStock = parseInt(row[4] || "0", 10);
+        const hasStock = currentStock > 0;
+        
+        return matchesSearch && hasStock;
+      })
+      .map((row) => [row[0], row[1], row[3]]); // [code, name, price]
     setFilteredRows(rows);
   }, [sheetData, search]);
 
@@ -91,27 +100,43 @@ function App() {
     return name && surname && street && city && state && zip && hasProducts;
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (!isFormValid()) {
       alert("Please fill all required fields and select at least one product.");
       return;
     }
 
-    const name = nameRef.current?.value || "";
-    const surname = surnameRef.current?.value || "";
-    const street = streetRef.current?.value || "";
-    const city = cityRef.current?.value || "";
-    const state = stateRef.current?.value || "";
-    const zip = zipRef.current?.value || "";
+    setIsProcessingOrder(true);
 
-    const customerInfo = `👤 Name: ${name} ${surname}\n🏠 Address: ${street}, ${city}, ${state}, ${zip}`;
+    try {
+      // First, update the quantities in the Google Sheet
+      await updateProductQuantities(selectedProducts);
 
-    const productInfo = Object.values(selectedProducts)
-      .map((p) => `${p.row[0]} ${p.row[1]} [${p.row[2]} $] x${p.quantity}`)
-      .join("\n");
+      // Generate the summary after successful update
+      const name = nameRef.current?.value || "";
+      const surname = surnameRef.current?.value || "";
+      const street = streetRef.current?.value || "";
+      const city = cityRef.current?.value || "";
+      const state = stateRef.current?.value || "";
+      const zip = zipRef.current?.value || "";
 
-    const summary = `🛒 Products:\n${productInfo}\n${customerInfo}`;
-    setSummaryText(summary);
+      const customerInfo = `👤 Name: ${name} ${surname}\n🏠 Address: ${street}, ${city}, ${state}, ${zip}`;
+
+      const productInfo = Object.values(selectedProducts)
+        .map((p) => `${p.row[0]} ${p.row[1]} [${p.row[2]} $] x${p.quantity}`)
+        .join("\n");
+
+      const summary = `🛒 Products:\n${productInfo}\n${customerInfo}\n\n✅ Order confirmed and inventory updated!`;
+      setSummaryText(summary);
+      
+      alert("Order confirmed successfully! Product quantities have been updated in the spreadsheet.");
+      
+    } catch (error) {
+      console.error("Error processing order:", error);
+      alert("Error processing order. Please try again.");
+    } finally {
+      setIsProcessingOrder(false);
+    }
   };
 
   const handleCopy = () => {
@@ -121,11 +146,46 @@ function App() {
     }
   };
 
+  const getStockIssues = () => {
+    if (!sheetData?.values) return { hasIssues: false, issues: [] };
+    
+    const issues: string[] = [];
+    
+    for (const [, productData] of Object.entries(selectedProducts)) {
+      const { row: productRow, quantity: orderedQuantity } = productData;
+      const [productCode, productName] = productRow;
+      
+      // Find the matching row in the sheet data
+      const rowIndex = sheetData.values.findIndex((sheetRow, index) => {
+        if (index === 0) return false; // Skip header row
+        return sheetRow[0] === productCode && sheetRow[1] === productName;
+      });
+      
+      if (rowIndex !== -1) {
+        const currentQuantity = parseInt(sheetData.values[rowIndex][4] || "0", 10);
+        if (currentQuantity < orderedQuantity) {
+          issues.push(`${productName} (${productCode}): out of stock.`);
+        }
+      }
+    }
+    
+    return { hasIssues: issues.length > 0, issues };
+  };
+
+  const stockStatus = getStockIssues();
+
   return (
-    <>
-      <button onClick={handleAuthClick} className="auth-button">
-        Authorize
+    <div className="container">
+      <button onClick={handleAuthClick} className="auth-btn">
+        <img src={googleLogo} className="logo" alt="Google logo" />
+        Google
       </button>
+
+      {status && (
+        <div className="status-message">
+          Status: {status}
+        </div>
+      )}
       <form onSubmit={(e) => e.preventDefault()} className="search-form">
         <div className="search-wrapper">
           <input
@@ -155,27 +215,64 @@ function App() {
         </div>
       </form>
       <br />
-      <div className="product-container">
-        {Object.entries(selectedProducts).map(([key, data]) => (
-          <div key={key} className="product-item">
-            <span className="product-name">
-              {" "}
-              <span style={{ marginRight: "1em" }}>{data.row[0]}</span>
-              <span style={{ marginRight: "1em" }}>{data.row[1]}</span>
-              <span>[{data.row[2]} $]</span>
-            </span>
-            <div className="product-actions">
-              <span className="product-qty">x{data.quantity}</span>
-              <button
-                onClick={() => handleDeleteProduct(key)}
-                className="delete-button"
-              >
-                <Close />
-              </button>
-            </div>
+      <fieldset className="product-container">
+        <legend>Selected Products</legend>
+        {Object.entries(selectedProducts).length === 0 ? (
+          <div  className="no-products">
+            No products selected yet
           </div>
-        ))}
-      </div>
+        ) : (
+          Object.entries(selectedProducts).map(([key, data]) => {
+            // Check current stock for this product
+            let currentStock = 0;
+            if (sheetData?.values) {
+              const rowIndex = sheetData.values.findIndex((sheetRow, index) => {
+                if (index === 0) return false;
+                return sheetRow[0] === data.row[0] && sheetRow[1] === data.row[1];
+              });
+              if (rowIndex !== -1) {
+                currentStock = parseInt(sheetData.values[rowIndex][4] || "0", 10);
+              }
+            }
+            
+            const isInsufficient = currentStock < data.quantity;
+            
+            return (
+              <div key={key} className="product-item" style={{
+                backgroundColor: isInsufficient ? '#ffebee' : 'transparent',
+                border: isInsufficient ? '1px solid #f44336' : '1px solid #ddd'
+              }}>
+                <span className="product-name">
+                  <span style={{ marginRight: "1em" }}>{data.row[0]}</span>
+                  <span style={{ marginRight: "1em" }}>{data.row[1]}</span>
+                  <span>[{data.row[2]} $]</span>
+                </span>
+                <div className="product-actions">
+                  <span className="product-qty">x{data.quantity}</span>
+                  <button
+                    onClick={() => handleDeleteProduct(key)}
+                    className="delete-button"
+                  >
+                    <Close />
+                  </button>
+                </div>
+              </div>
+            );
+          })
+        )}
+        {stockStatus.hasIssues && (
+          <div className="stock-status"  >
+            <div className="stock-issues-header">
+              ⚠️ Stock Issues:
+            </div>
+            {stockStatus.issues.map((issue, index) => (
+              <div key={index} className="stock-issue">
+                {issue}
+              </div>
+            ))}
+          </div>
+        )}
+      </fieldset>
       <br />
       <form>
         <fieldset className="name-container">
@@ -195,7 +292,16 @@ function App() {
           <input type="text" placeholder="Zip code" ref={zipRef} />
         </fieldset>
       </form>
-      <button onClick={handleConfirm}>Confirm Order</button>
+      <button 
+        onClick={handleConfirm}
+        disabled={isProcessingOrder || loading || stockStatus.hasIssues}
+        style={{
+          opacity: (isProcessingOrder || loading || stockStatus.hasIssues) ? 0.5 : 1,
+          cursor: (isProcessingOrder || loading || stockStatus.hasIssues) ? 'not-allowed' : 'pointer'
+        }}
+      >
+        {isProcessingOrder ? 'Processing Order...' : 'Confirm Order'}
+      </button>
       <br />
       <br />
       <div className="copy-wrapper">
@@ -218,7 +324,7 @@ function App() {
       <br />
       {/* <button>Payment Success</button> */}
       <button onClick={handleClear}>Clear</button>
-    </>
+    </div>
   );
 }
 

@@ -180,33 +180,92 @@ const handleAuthClick = useCallback(() => {
         .filter(Boolean)
     : [];
 
-  const updateScore = useCallback(
-    async (rowNumber: number, newScore: string | number) => {
+  // const updateScore = useCallback(
+  //   async (rowNumber: number, newScore: string | number) => {
+  //     setLoading(true);
+  //     setStatus("Updating score...");
+  //     try {
+  //       // "คะแนน" is column D, so column 4 (A=1, D=4)
+  //       const cell = `D${rowNumber + 1}`; // +1 for header row
+  //       await window.gapi.client.sheets.spreadsheets.values.update({
+  //         spreadsheetId: spreadsheetIdInit,
+  //         range: `${rangeInit}!${cell}`,
+  //         valueInputOption: "USER_ENTERED",
+  //         resource: {
+  //           values: [[newScore]],
+  //         },
+  //       });
+  //       setStatus(`Score updated for row ${rowNumber}`);
+  //       await readSheetData(); // Refresh data
+  //     } catch (error) {
+  //       const errorMessage =
+  //         error instanceof Error ? error.message : "Unknown error occurred";
+  //       setStatus(`Error updating score: ${errorMessage}`);
+  //       console.error("Error updating score:", error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   },
+  //   [readSheetData]
+  // );
+
+   const updateProductQuantities = useCallback(
+    async (selectedProducts: { [key: string]: { row: string[]; quantity: number } }) => {
       setLoading(true);
-      setStatus("Updating score...");
+      setStatus("Updating product quantities...");
+      
       try {
-        // "คะแนน" is column D, so column 4 (A=1, D=4)
-        const cell = `D${rowNumber + 1}`; // +1 for header row
-        await window.gapi.client.sheets.spreadsheets.values.update({
-          spreadsheetId: spreadsheetIdInit,
-          range: `${rangeInit}!${cell}`,
-          valueInputOption: "USER_ENTERED",
-          resource: {
-            values: [[newScore]],
-          },
+        if (!sheetData?.values) {
+          throw new Error("No sheet data available");
+        }
+
+        const updates: Promise<unknown>[] = [];
+        
+        Object.values(selectedProducts).forEach((productData) => {
+          const { row: productRow, quantity: orderedQuantity } = productData;
+          const [productCode, productName] = productRow;
+          
+          const rowIndex = sheetData.values!.findIndex((sheetRow, index) => {
+            if (index === 0) return false;
+            return sheetRow[0] === productCode && sheetRow[1] === productName;
+          });
+          
+          if (rowIndex !== -1) {
+            const currentQuantity = parseInt(sheetData.values![rowIndex][4] || "0", 10);
+            const newQuantity = Math.max(0, currentQuantity - orderedQuantity);
+            
+            const cellRange = `${rangeInit}!E${rowIndex + 1}`;
+            
+            const updatePromise = window.gapi.client.sheets.spreadsheets.values.update({
+              spreadsheetId: spreadsheetIdInit,
+              range: cellRange,
+              valueInputOption: "USER_ENTERED",
+              resource: {
+                values: [[newQuantity]],
+              },
+            });
+            
+            updates.push(updatePromise);
+          }
         });
-        setStatus(`Score updated for row ${rowNumber}`);
-        await readSheetData(); // Refresh data
+
+        await Promise.all(updates);
+        
+        setStatus(`Successfully updated quantities for ${updates.length} products`);
+        
+        await readSheetData();
+        
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : "Unknown error occurred";
-        setStatus(`Error updating score: ${errorMessage}`);
-        console.error("Error updating score:", error);
+        setStatus(`Error updating quantities: ${errorMessage}`);
+        console.error("Error updating quantities:", error);
+        throw error;
       } finally {
         setLoading(false);
       }
     },
-    [readSheetData]
+    [sheetData, readSheetData]
   );
 
   const DisplayTable = ({
@@ -320,6 +379,8 @@ const handleAuthClick = useCallback(() => {
     sheetData,
     readSheetData,
     loading,
-    handleAuthClick
+    handleAuthClick,
+    updateProductQuantities,
+    status
   }
 }
