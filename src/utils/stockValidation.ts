@@ -1,8 +1,4 @@
-import type { ProductMap } from "../types";
-
-interface SheetData {
-  values?: string[][];
-}
+import type { SheetData, ProductMap } from "../types";
 
 export function validateStock(
   selectedProducts: ProductMap,

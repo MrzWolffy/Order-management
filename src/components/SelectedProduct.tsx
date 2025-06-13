@@ -1,10 +1,5 @@
 import Close from "@mui/icons-material/Close";
-import type { ProductMap } from "../types";
-
-interface SheetData {
-  values?: string[][];
-}
-
+import type { SheetData, ProductMap } from "../types";
 interface SelectedProductsProps {
   selectedProducts: ProductMap;
   sheetData: SheetData;

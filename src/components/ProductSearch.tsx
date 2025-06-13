@@ -1,9 +1,5 @@
 import { useState, useEffect } from "react";
-
-interface SheetData {
-  values?: string[][];
-}
-
+import type { SheetData } from "../types";
 interface ProductSearchProps {
   sheetData: SheetData;
   onProductSelect: (row: string[]) => void;
