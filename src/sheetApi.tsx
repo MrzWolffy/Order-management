@@ -46,17 +46,12 @@ export function useSheetApi() {
   const [tokenClient, setTokenClient] = useState<TokenClient | null>(null);
   const [authStatus, setAuthStatus] = useState("Initializing...");
   const [status, setStatus] = useState("");
-  const [displayFormat, setDisplayFormat] = useState<"table" | "json" | "raw">(
-    "table"
-  );
   const [sheetData, setSheetData] = useState<{
     values?: string[][];
     range?: string;
   } | null>(null);
   const [loading, setLoading] = useState(false);
-  const [editRow, setEditRow] = useState<number>(1);
-  const [editScore, setEditScore] = useState<string>("");
-  const [selectedName, setSelectedName] = useState<string>("");
+
 
   const initializeGapiClient = useCallback(async () => {
     try {
@@ -169,47 +164,6 @@ const handleAuthClick = useCallback(() => {
     }
   }, [spreadsheetIdInit, rangeInit]);
 
-  const clearResults = useCallback(() => {
-    setSheetData(null);
-    setStatus("");
-  }, []);
-
-  const nameOptions = sheetData?.values
-    ? sheetData.values
-        .slice(1)
-        .map((row) => row[1])
-        .filter(Boolean)
-    : [];
-
-  // const updateScore = useCallback(
-  //   async (rowNumber: number, newScore: string | number) => {
-  //     setLoading(true);
-  //     setStatus("Updating score...");
-  //     try {
-  //       // "คะแนน" is column D, so column 4 (A=1, D=4)
-  //       const cell = `D${rowNumber + 1}`; // +1 for header row
-  //       await window.gapi.client.sheets.spreadsheets.values.update({
-  //         spreadsheetId: spreadsheetIdInit,
-  //         range: `${rangeInit}!${cell}`,
-  //         valueInputOption: "USER_ENTERED",
-  //         resource: {
-  //           values: [[newScore]],
-  //         },
-  //       });
-  //       setStatus(`Score updated for row ${rowNumber}`);
-  //       await readSheetData(); // Refresh data
-  //     } catch (error) {
-  //       const errorMessage =
-  //         error instanceof Error ? error.message : "Unknown error occurred";
-  //       setStatus(`Error updating score: ${errorMessage}`);
-  //       console.error("Error updating score:", error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   },
-  //   [readSheetData]
-  // );
-
    const updateProductQuantities = useCallback(
     async (selectedProducts: { [key: string]: { row: string[]; quantity: number } }) => {
       setLoading(true);
@@ -269,112 +223,7 @@ const handleAuthClick = useCallback(() => {
     [sheetData, readSheetData]
   );
 
-  const DisplayTable = ({
-    values,
-    range,
-  }: {
-    values: string[][];
-    range?: string;
-  }) => (
-    <div className="mt-4">
-      <h3 className="text-lg font-semibold mb-2">
-        Sheet Data{range && ` (${range})`}
-      </h3>
-      <div className="overflow-x-auto">
-        <table className="min-w-full border-collapse border border-gray-300">
-          <tbody>
-            {values.map((row, rowIndex) => (
-              <tr
-                key={rowIndex}
-                className={
-                  rowIndex === 0
-                    ? "bg-gray-100 font-semibold"
-                    : rowIndex % 2 === 0
-                    ? "bg-gray-50"
-                    : ""
-                }
-              >
-                {row.map((cell, cellIndex) => {
-                  const Tag = rowIndex === 0 ? "th" : "td";
-                  return (
-                    <Tag
-                      key={cellIndex}
-                      className="border border-gray-300 px-4 py-2 text-left"
-                    >
-                      {cell || ""}
-                    </Tag>
-                  );
-                })}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <p className="mt-2 text-sm text-gray-600">
-        <strong>Total rows:</strong> {values.length}
-      </p>
-    </div>
-  );
-
-  const DisplayJSON = ({
-    values,
-    range,
-  }: {
-    values: string[][];
-    range?: string;
-  }) => {
-    const headers = values[0] || [];
-    const rows = values.slice(1);
-
-    const jsonData = rows.map((row) => {
-      const obj: { [key: string]: string } = {};
-      headers.forEach((header, index) => {
-        obj[header || `Column_${index + 1}`] = row[index] || "";
-      });
-      return obj;
-    });
-
-    return (
-      <div className="mt-4">
-        <h3 className="text-lg font-semibold mb-2">
-          Sheet Data as JSON{range && ` (${range})`}
-        </h3>
-        <pre className="bg-gray-100 p-4 rounded overflow-x-auto text-sm">
-          {JSON.stringify(jsonData, null, 2)}
-        </pre>
-        <p className="mt-2 text-sm text-gray-600">
-          <strong>Total records:</strong> {jsonData.length}
-        </p>
-      </div>
-    );
-  };
-
-  const DisplayRaw = ({
-    values,
-    range,
-  }: {
-    values: string[][];
-    range?: string;
-  }) => {
-    const rawText = values.map((row) => row.join("\t")).join("\n");
-
-    return (
-      <div className="mt-4">
-        <h3 className="text-lg font-semibold mb-2">
-          Raw Sheet Data{range && ` (${range})`}
-        </h3>
-        <pre className="bg-gray-100 p-4 rounded overflow-x-auto text-sm whitespace-pre-wrap">
-          {rawText}
-        </pre>
-        <p className="mt-2 text-sm text-gray-600">
-          <strong>Total rows:</strong> {values.length}
-        </p>
-      </div>
-    );
-  };
-
-  const canAuthorize = gapiInited && gisInited;
-  const canReadSheet = isAuthorized && !loading;
+  
 
   return {
     sheetData,
