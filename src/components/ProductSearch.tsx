@@ -23,7 +23,7 @@ export function ProductSearch({ sheetData, onProductSelect, onFocus }: ProductSe
         const matchesSearch = row.some(
           (cell) => cell && cell.toLowerCase().includes(search.toLowerCase())
         );
-        const currentStock = parseInt(row[4] || "0", 10);
+        const currentStock = parseInt(row[9] || "0", 10);
         const hasStock = currentStock > 0;
         return matchesSearch && hasStock;
       })
