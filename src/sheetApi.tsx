@@ -41,10 +41,10 @@ const rangeInit = "Retake2";
 
 export function useSheetApi() {
   const [isAuthorized, setIsAuthorized] = useState(false);
-  const [, setGapiInited] = useState(false);
-  const [, setGisInited] = useState(false);
+  const [gapiInited, setGapiInited] = useState(false);
+  const [gisInited, setGisInited] = useState(false);
   const [tokenClient, setTokenClient] = useState<TokenClient | null>(null);
-  const [, setAuthStatus] = useState("Initializing...");
+  const [authStatus, setAuthStatus] = useState("Initializing...");
   const [status, setStatus] = useState("");
   const [sheetData, setSheetData] = useState<{
     values?: string[][];
@@ -59,11 +59,11 @@ export function useSheetApi() {
         apiKey: API_KEY,
         discoveryDocs: [DISCOVERY_DOC],
       });
-      setGapiInited(true);
-      setAuthStatus("Ready to authorize");
+      // setGapiInited(true);
+      // setAuthStatus("Ready to authorize");
     } catch (error) {
       console.error("Error initializing GAPI client:", error);
-      setAuthStatus("Error initializing Google API client");
+      // setAuthStatus("Error initializing Google API client");
     }
   }, []);
 
@@ -78,7 +78,7 @@ export function useSheetApi() {
       callback: "",
     });
     setTokenClient(client);
-    setGisInited(true);
+    // setGisInited(true);
   }, []);
 
   useEffect(() => {
@@ -110,12 +110,12 @@ const handleAuthClick = useCallback(() => {
 
   tokenClient.callback = async (resp: TokenResponse) => {
     if (resp.error !== undefined) {
-      setAuthStatus(`Authorization error: ${resp.error}`);
+      // setAuthStatus(`Authorization error: ${resp.error}`);
       return;
     }
 
     setIsAuthorized(true);
-    setAuthStatus("Successfully authorized!");
+    // setAuthStatus("Successfully authorized!");
     await readSheetData(); // <-- Automatically read data after authorize
   };
 
@@ -132,7 +132,7 @@ const handleAuthClick = useCallback(() => {
       window.google.accounts.oauth2.revoke(token.access_token);
       window.gapi.client.setToken("");
       setIsAuthorized(false);
-      setAuthStatus("Signed out");
+      // setAuthStatus("Signed out");
       setSheetData(null);
       setStatus("");
       setStatus("Logged out successfully");
