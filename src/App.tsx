@@ -1,35 +1,118 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useRef } from "react";
+import "./App.css";
+import { useSheetApi } from "./sheetApi";
+import { useOrderManagement } from "./hooks/userOrderManagement";
+import { validateStock } from "./utils/stockValidation";
+import { AuthSection } from "./components/AuthSection";
+import { ProductSearch } from "./components/ProductSearch";
+import { SelectedProducts } from "./components/SelectedProduct";
+import { CustomerForm, type CustomerFormRef } from "./components/CustomForm";
+import { OrderSummary } from "./components/OrderSummary";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const { 
+    sheetData, 
+    readSheetData, 
+    loading, 
+    handleAuthClick, 
+    handleSignoutClick, 
+    updateProductQuantities, 
+    isAuthorized 
+  } = useSheetApi();
+
+  const {
+    selectedProducts,
+    summaryText,
+    isProcessingOrder,
+    handleSelectProduct,
+    handleDeleteProduct,
+    processOrder,
+    clearOrder,
+    copyToClipboard,
+  } = useOrderManagement();
+
+  const customerFormRef = useRef<CustomerFormRef>(null);
+
+  const stockStatus = validateStock(selectedProducts, sheetData ?? { values: [], range: '' });
+
+  const handleConfirm = async () => {
+    const customerInfo = customerFormRef.current?.getCustomerInfo();
+    const isFormValid = customerFormRef.current?.isValid();
+    const hasProducts = Object.keys(selectedProducts).length > 0;
+
+    if (!isFormValid || !hasProducts) {
+      alert("Please fill all required fields and select at least one product.");
+      return;
+    }
+
+    const result = await processOrder(customerInfo!, updateProductQuantities);
+    
+    if (result.success) {
+      alert("Order confirmed successfully! Product quantities have been updated in the spreadsheet.");
+    } else {
+      alert("Error processing order. Please try again.");
+    }
+  };
+
+  const handleClear = () => {
+    clearOrder();
+    customerFormRef.current?.clear();
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div className="container">
+      <AuthSection
+        isAuthorized={isAuthorized}
+        onAuthClick={handleAuthClick}
+        onSignoutClick={handleSignoutClick}
+      />
+
+      <form onSubmit={(e) => e.preventDefault()} className="search-form">
+        <ProductSearch
+          sheetData={sheetData ?? { values: [], range: '' }}
+          onProductSelect={handleSelectProduct}
+          onFocus={readSheetData}
+        />
+      </form>
+
+      <br />
+
+      <SelectedProducts
+        selectedProducts={selectedProducts}
+        sheetData={sheetData ?? { values: [], range: '' }}
+        onDeleteProduct={handleDeleteProduct}
+      />
+
+      <br />
+
+      <form>
+        <CustomerForm ref={customerFormRef} />
+      </form>
+
+      <button 
+        onClick={handleConfirm}
+        disabled={isProcessingOrder || loading || stockStatus.hasIssues}
+        style={{
+          opacity: (isProcessingOrder || loading || stockStatus.hasIssues) ? 0.5 : 1,
+          cursor: (isProcessingOrder || loading || stockStatus.hasIssues) ? 'not-allowed' : 'pointer'
+        }}
+      >
+        {isProcessingOrder ? 'Processing Order...' : 'Confirm Order'}
+      </button>
+
+      <br />
+      <br />
+
+      <OrderSummary
+        summaryText={summaryText}
+        onCopy={copyToClipboard}
+      />
+
+      <br />
+      <br />
+      <button onClick={handleClear}>Clear</button>
+    </div>
+  );
 }
 
-export default App
+export default App;
