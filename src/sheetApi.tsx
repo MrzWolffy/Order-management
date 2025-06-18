@@ -37,7 +37,7 @@ const DISCOVERY_DOC =
   "https://sheets.googleapis.com/$discovery/rest?version=v4";
 const SCOPES = "https://www.googleapis.com/auth/spreadsheets";
 const spreadsheetIdInit = "1gXRy6QitGWlqAEpmccOulERaY14PcnYenmJ6MeDbt4w";
-const rangeInit = "Retake2";
+const rangeInit = "Stock";
 
 export function useSheetApi() {
   const [isAuthorized, setIsAuthorized] = useState(false);
