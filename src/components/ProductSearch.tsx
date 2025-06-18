@@ -27,7 +27,7 @@ export function ProductSearch({ sheetData, onProductSelect, onFocus }: ProductSe
         const hasStock = currentStock > 0;
         return matchesSearch && hasStock;
       })
-      .map((row: string[]) => [row[0], row[1], row[3]]);
+      .map((row: string[]) => [row[0], row[1], row[5]]);
     
     setFilteredRows(rows);
   }, [sheetData, search]);
