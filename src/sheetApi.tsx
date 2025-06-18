@@ -41,10 +41,10 @@ const rangeInit = "Retake2";
 
 export function useSheetApi() {
   const [isAuthorized, setIsAuthorized] = useState(false);
-  const [gapiInited, setGapiInited] = useState(false);
-  const [gisInited, setGisInited] = useState(false);
+  const [, setGapiInited] = useState(false);
+  const [, setGisInited] = useState(false);
   const [tokenClient, setTokenClient] = useState<TokenClient | null>(null);
-  const [authStatus, setAuthStatus] = useState("Initializing...");
+  const [, setAuthStatus] = useState("Initializing...");
   const [status, setStatus] = useState("");
   const [sheetData, setSheetData] = useState<{
     values?: string[][];
