@@ -240,3 +240,10 @@
   font-size: inherit;
   line-height: inherit;
 }
+
+.navigateButtons {
+  position: absolute;
+  top: 16px;
+  left: auto;
+  right: 16px;
+}

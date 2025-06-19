@@ -1,6 +1,8 @@
-import { useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import "./App.css";
 import { useSheetApi } from "./sheetApi";
+import { StatusPage } from "./StatusPage";
+import { BrowserRouter as Router, Route, Routes, useNavigate } from "react-router-dom"
 import { useOrderManagement } from "./hooks/userOrderManagement";
 import { validateStock } from "./utils/stockValidation";
 import { AuthSection } from "./components/AuthSection";
@@ -32,6 +34,7 @@ function App() {
   } = useOrderManagement();
 
   const customerFormRef = useRef<CustomerFormRef>(null);
+  const navigate = useNavigate();
 
   const stockStatus = validateStock(selectedProducts, sheetData ?? { values: [], range: '' });
 
@@ -60,6 +63,8 @@ function App() {
   };
 
   return (
+    <>
+    <button onClick={() => navigate("/status")} className="navigateButtons">Status</button>
     <div className="container">
       <AuthSection
         isAuthorized={isAuthorized}
@@ -112,6 +117,7 @@ function App() {
       <br />
       <button onClick={handleClear}>Clear</button>
     </div>
+    </>
   );
 }
 
