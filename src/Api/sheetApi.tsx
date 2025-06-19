@@ -37,21 +37,21 @@ const DISCOVERY_DOC =
   "https://sheets.googleapis.com/$discovery/rest?version=v4";
 const SCOPES = "https://www.googleapis.com/auth/spreadsheets";
 const spreadsheetIdInit = "1gXRy6QitGWlqAEpmccOulERaY14PcnYenmJ6MeDbt4w";
-const rangeInit = "Stock";
+const rangeInit = "Retake2";
 
 export function useSheetApi() {
   const [isAuthorized, setIsAuthorized] = useState(false);
-  // const [gapiInited, setGapiInited] = useState(false);
-  // const [gisInited, setGisInited] = useState(false);
+  const [gapiInited, setGapiInited] = useState(false);
+  const [gisInited, setGisInited] = useState(false);
   const [tokenClient, setTokenClient] = useState<TokenClient | null>(null);
-  // const [authStatus, setAuthStatus] = useState("Initializing...");
+  const [authStatus, setAuthStatus] = useState("Initializing...");
   const [status, setStatus] = useState("");
+
   const [sheetData, setSheetData] = useState<{
     values?: string[][];
     range?: string;
   } | null>(null);
   const [loading, setLoading] = useState(false);
-
 
   const initializeGapiClient = useCallback(async () => {
     try {
@@ -59,11 +59,11 @@ export function useSheetApi() {
         apiKey: API_KEY,
         discoveryDocs: [DISCOVERY_DOC],
       });
-      // setGapiInited(true);
-      // setAuthStatus("Ready to authorize");
+      setGapiInited(true);
+      setAuthStatus("Ready to authorize");
     } catch (error) {
       console.error("Error initializing GAPI client:", error);
-      // setAuthStatus("Error initializing Google API client");
+      setAuthStatus("Error initializing Google API client");
     }
   }, []);
 
@@ -78,7 +78,7 @@ export function useSheetApi() {
       callback: "",
     });
     setTokenClient(client);
-    // setGisInited(true);
+    setGisInited(true);
   }, []);
 
   useEffect(() => {
@@ -110,12 +110,12 @@ const handleAuthClick = useCallback(() => {
 
   tokenClient.callback = async (resp: TokenResponse) => {
     if (resp.error !== undefined) {
-      // setAuthStatus(`Authorization error: ${resp.error}`);
+      setAuthStatus(`Authorization error: ${resp.error}`);
       return;
     }
 
     setIsAuthorized(true);
-    // setAuthStatus("Successfully authorized!");
+    setAuthStatus("Successfully authorized!");
     await readSheetData(); // <-- Automatically read data after authorize
   };
 
@@ -125,19 +125,6 @@ const handleAuthClick = useCallback(() => {
     tokenClient.requestAccessToken({ prompt: "" });
   }
 }, [tokenClient]);
-
-  const handleSignoutClick = useCallback(() => {
-    const token = window.gapi.client.getToken();
-    if (token !== null) {
-      window.google.accounts.oauth2.revoke(token.access_token);
-      window.gapi.client.setToken("");
-      setIsAuthorized(false);
-      // setAuthStatus("Signed out");
-      setSheetData(null);
-      setStatus("");
-      setStatus("Logged out successfully");
-    }
-  }, []);
 
   const readSheetData = useCallback(async () => {
     setLoading(true);
@@ -164,75 +151,10 @@ const handleAuthClick = useCallback(() => {
     }
   }, [spreadsheetIdInit, rangeInit]);
 
-   const updateProductQuantities = useCallback(
-    async (selectedProducts: { [key: string]: { row: string[]; quantity: number } }) => {
-      setLoading(true);
-      setStatus("Updating product quantities...");
-      
-      try {
-        if (!sheetData?.values) {
-          throw new Error("No sheet data available");
-        }
-
-        const updates: Promise<unknown>[] = [];
-        
-        Object.values(selectedProducts).forEach((productData) => {
-          const { row: productRow, quantity: orderedQuantity } = productData;
-          const [productCode, productName] = productRow;
-          
-          const rowIndex = sheetData.values!.findIndex((sheetRow, index) => {
-            if (index === 0) return false;
-            return sheetRow[0] === productCode && sheetRow[1] === productName;
-          });
-          
-          if (rowIndex !== -1) {
-            const currentQuantity = parseInt(sheetData.values![rowIndex][4] || "0", 10);
-            const newQuantity = Math.max(0, currentQuantity - orderedQuantity);
-            
-            const cellRange = `${rangeInit}!E${rowIndex + 1}`;
-            
-            const updatePromise = window.gapi.client.sheets.spreadsheets.values.update({
-              spreadsheetId: spreadsheetIdInit,
-              range: cellRange,
-              valueInputOption: "USER_ENTERED",
-              resource: {
-                values: [[newQuantity]],
-              },
-            });
-            
-            updates.push(updatePromise);
-          }
-        });
-
-        await Promise.all(updates);
-        
-        setStatus(`Successfully updated quantities for ${updates.length} products`);
-        
-        await readSheetData();
-        
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
-        setStatus(`Error updating quantities: ${errorMessage}`);
-        console.error("Error updating quantities:", error);
-        throw error;
-      } finally {
-        setLoading(false);
-      }
-    },
-    [sheetData, readSheetData]
-  );
-
-  
-
   return {
     sheetData,
     readSheetData,
     loading,
-    handleAuthClick,
-    handleSignoutClick,
-    updateProductQuantities,
-    status,
-    isAuthorized,
+    handleAuthClick
   }
 }
