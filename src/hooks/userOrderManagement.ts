@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { ProductMap, CustomerInfo } from "../types";
+import type { ProductMap } from "../types";
 
 export function useOrderManagement() {
   const [selectedProducts, setSelectedProducts] = useState<ProductMap>({});
@@ -30,25 +30,22 @@ export function useOrderManagement() {
     });
   };
 
-  const generateSummary = (customerInfo: CustomerInfo) => {
-    const customerDetails = `👤 Name: ${customerInfo.name} ${customerInfo.surname}\n🏠 Address: ${customerInfo.street}, ${customerInfo.city}, ${customerInfo.state}, ${customerInfo.zip}`;
-
+  const generateSummary = () => {
     const productInfo = Object.values(selectedProducts)
       .map((p) => `${p.row[0]} ${p.row[1]} [${p.row[2]} $] x${p.quantity}`)
       .join("\n");
 
-    return `🛒 Products:\n${productInfo}\n${customerDetails}\n\n✅ Order confirmed and inventory updated!`;
+    return `🛒 Products:\n${productInfo}\n✅ Order confirmed and inventory updated!`;
   };
 
   const processOrder = async (
-    customerInfo: CustomerInfo,
     updateProductQuantities: (products: ProductMap) => Promise<void>
   ) => {
     setIsProcessingOrder(true);
     
     try {
       await updateProductQuantities(selectedProducts);
-      const summary = generateSummary(customerInfo);
+      const summary = generateSummary();
       setSummaryText(summary);
       return { success: true };
     } catch (error) {

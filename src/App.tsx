@@ -1,4 +1,3 @@
-import { useRef } from "react";
 import "./App.css";
 import { useSheetApi } from "./sheetApi";
 import { useOrderManagement } from "./hooks/userOrderManagement";
@@ -6,7 +5,6 @@ import { validateStock } from "./utils/stockValidation";
 import { AuthSection } from "./components/AuthSection";
 import { ProductSearch } from "./components/ProductSearch";
 import { SelectedProducts } from "./components/SelectedProduct";
-import { CustomerForm, type CustomerFormRef } from "./components/CustomForm";
 import { OrderSummary } from "./components/OrderSummary";
 
 function App() {
@@ -31,21 +29,17 @@ function App() {
     copyToClipboard,
   } = useOrderManagement();
 
-  const customerFormRef = useRef<CustomerFormRef>(null);
-
   const stockStatus = validateStock(selectedProducts, sheetData ?? { values: [], range: '' });
 
   const handleConfirm = async () => {
-    const customerInfo = customerFormRef.current?.getCustomerInfo();
-    const isFormValid = customerFormRef.current?.isValid();
     const hasProducts = Object.keys(selectedProducts).length > 0;
 
-    if (!isFormValid || !hasProducts) {
+    if (!hasProducts) {
       alert("Please fill all required fields and select at least one product.");
       return;
     }
 
-    const result = await processOrder(customerInfo!, updateProductQuantities);
+    const result = await processOrder(updateProductQuantities);
     
     if (result.success) {
       alert("Order confirmed successfully! Product quantities have been updated in the spreadsheet.");
@@ -56,7 +50,6 @@ function App() {
 
   const handleClear = () => {
     clearOrder();
-    customerFormRef.current?.clear();
   };
 
   return (
@@ -84,10 +77,6 @@ function App() {
       />
 
       <br />
-
-      <form>
-        <CustomerForm ref={customerFormRef} />
-      </form>
 
       <button 
         onClick={handleConfirm}
