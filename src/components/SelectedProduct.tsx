@@ -22,7 +22,7 @@ export function SelectedProducts({ selectedProducts, sheetData, onDeleteProduct 
       });
       
       if (rowIndex !== -1) {
-        const currentQuantity = parseInt(sheetData.values[rowIndex][4] || "0", 10);
+        const currentQuantity = parseInt(sheetData.values[rowIndex][3] || "0", 10);
         if (currentQuantity < orderedQuantity) {
           issues.push(`${productName} (${productCode}): out of stock.`);
         }
@@ -50,7 +50,7 @@ export function SelectedProducts({ selectedProducts, sheetData, onDeleteProduct 
               return sheetRow[0] === data.row[0] && sheetRow[1] === data.row[1];
             });
             if (rowIndex !== -1) {
-              currentStock = parseInt(sheetData.values[rowIndex][4] || "0", 10);
+              currentStock = parseInt(sheetData.values[rowIndex][3] || "0", 10);
             }
           }
           

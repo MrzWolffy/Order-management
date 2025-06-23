@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { ProductMap, CustomerInfo } from "../types";
+import type { ProductMap} from "../types";
 
 export function useOrderManagement() {
   const [selectedProducts, setSelectedProducts] = useState<ProductMap>({});
@@ -8,19 +8,17 @@ export function useOrderManagement() {
 
   const getRowKey = (row: string[]) => row.join(" | ");
 
-  const handleSelectProduct = (row: string[]) => {
-    const key = getRowKey(row);
+  const handleSelectProduct = (row: string[], quantity: number) => {
     setSelectedProducts((prev) => {
-      const existing = prev[key];
+      const key = row.join(" | ");
+      const prevQuantity = prev[key]?.quantity || 0;
       return {
         ...prev,
-        [key]: {
-          row,
-          quantity: existing ? existing.quantity + 1 : 1,
-        },
+        [key]: { row, quantity: prevQuantity + quantity }
       };
     });
   };
+
 
   const handleDeleteProduct = (key: string) => {
     setSelectedProducts((prev) => {
@@ -30,26 +28,13 @@ export function useOrderManagement() {
     });
   };
 
-  const generateSummary = (customerInfo: CustomerInfo) => {
-    const customerDetails = `👤 Name: ${customerInfo.name} ${customerInfo.surname}\n🏠 Address: ${customerInfo.street}, ${customerInfo.city}, ${customerInfo.state}, ${customerInfo.zip}`;
-
-    const productInfo = Object.values(selectedProducts)
-      .map((p) => `${p.row[0]} ${p.row[1]} [${p.row[2]} $] x${p.quantity}`)
-      .join("\n");
-
-    return `🛒 Products:\n${productInfo}\n${customerDetails}\n\n✅ Order confirmed and inventory updated!`;
-  };
-
   const processOrder = async (
-    customerInfo: CustomerInfo,
     updateProductQuantities: (products: ProductMap) => Promise<void>
   ) => {
     setIsProcessingOrder(true);
     
     try {
       await updateProductQuantities(selectedProducts);
-      const summary = generateSummary(customerInfo);
-      setSummaryText(summary);
       return { success: true };
     } catch (error) {
       console.error("Error processing order:", error);
