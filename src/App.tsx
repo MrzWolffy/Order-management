@@ -46,7 +46,6 @@ function App() {
     }
 
     const result = await processOrder(updateProductQuantities);
-
     if (result.success) {
       alert(
         "Order confirmed successfully! Product quantities have been updated in the spreadsheet."
