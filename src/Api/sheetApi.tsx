@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://stripe-checkout-backend-production-442a.up.railway.app/api"; // Change if your backend runs elsewhere
+const API_BASE_URL = "https://stripe-checkout-backend-production-442a.up.railway.app/api"; // Change if your backend runs elsewhere
 
 export async function authorize() {
   const response = await fetch(`${API_BASE_URL}/authorize`, {
