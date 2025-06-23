@@ -6,8 +6,6 @@ export function useOrderManagement() {
   const [summaryText, setSummaryText] = useState("");
   const [isProcessingOrder, setIsProcessingOrder] = useState(false);
 
-  const getRowKey = (row: string[]) => row.join(" | ");
-
   const handleSelectProduct = (row: string[], quantity: number) => {
     setSelectedProducts((prev) => {
       const key = row.join(" | ");
