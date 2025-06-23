@@ -1,6 +1,6 @@
 import "./App.css";
 import { useSheetApi } from "./hooks/useSheetApi";
-import { BrowserRouter as Router, useNavigate } from "react-router-dom";
+// import { BrowserRouter as Router, useNavigate } from "react-router-dom";
 import { useOrderManagement } from "./hooks/userOrderManagement";
 import { validateStock } from "./utils/stockValidation";
 import { AuthSection } from "./components/AuthSection";
@@ -30,7 +30,7 @@ function App() {
     copyToClipboard,
   } = useOrderManagement();
 
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const stockStatus = validateStock(
     selectedProducts,
@@ -62,9 +62,9 @@ function App() {
 
   return (
     <>
-      <button onClick={() => navigate("/status")} className="navigateButtons">
+      {/* <button onClick={() => navigate("/status")} className="navigateButtons">
         Status
-      </button>
+      </button> */}
       <div className="container">
         <AuthSection
           isAuthorized={isAuthorized}
