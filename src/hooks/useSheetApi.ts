@@ -7,18 +7,23 @@ export function useSheetApi() {
   const [sheetData, setSheetData] = useState<SheetData | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const handleAuthClick = async () => {
-    setLoading(true);
-    try {
-      await authorize();
-      setIsAuthorized(true);
-    } catch (error) {
-      alert("Authorization failed");
-      setIsAuthorized(false);
-    } finally {
-      setLoading(false);
+const handleAuthClick = async () => {
+  setLoading(true);
+  try {
+    const result = await authorize();
+    if (result.authUrl) {
+      window.location.href = result.authUrl; // Redirect to Google login
+      // Do not set isAuthorized here; wait for callback flow to complete
+    } else {
+      setIsAuthorized(true); // Already authorized
     }
-  };
+  } catch (error) {
+    alert("Authorization failed");
+    setIsAuthorized(false);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleSignoutClick = () => {
     setIsAuthorized(false);
