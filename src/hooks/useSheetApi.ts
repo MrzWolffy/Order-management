@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { authorize , readSheet, updateStock } from "../Api/sheetApi";
 import type { SheetData , ProductMap} from "../types";
 
@@ -7,15 +7,31 @@ export function useSheetApi() {
   const [sheetData, setSheetData] = useState<SheetData | null>(null);
   const [loading, setLoading] = useState(false);
 
+    useEffect(() => {
+    const checkAuth = async () => {
+      setLoading(true);
+      try {
+        const result = await authorize();
+        if (!result.authUrl) {
+          setIsAuthorized(true);
+        }
+      } catch {
+        setIsAuthorized(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+    checkAuth();
+  }, []);
+
 const handleAuthClick = async () => {
   setLoading(true);
   try {
     const result = await authorize();
     if (result.authUrl) {
-      window.location.href = result.authUrl; // Redirect to Google login
-      // Do not set isAuthorized here; wait for callback flow to complete
+      window.location.href = result.authUrl;
     } else {
-      setIsAuthorized(true); // Already authorized
+      setIsAuthorized(true);
     }
   } catch (error) {
     alert("Authorization failed");
