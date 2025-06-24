@@ -26,6 +26,14 @@ export function useOrderManagement() {
     });
   };
 
+  const generateSummary = () => {
+    const productInfo = Object.values(selectedProducts)
+      .map((p) => `${p.row[0]} ${p.row[1]} [${p.row[2]} $] x${p.quantity}`)
+      .join("\n");
+
+    return `🛒 Products:\n${productInfo}\n✅ Order confirmed and inventory updated!`;
+  };
+
   const processOrder = async (
     updateProductQuantities: (products: ProductMap) => Promise<void>
   ) => {
@@ -33,6 +41,8 @@ export function useOrderManagement() {
     
     try {
       await updateProductQuantities(selectedProducts);
+      const summary = generateSummary();
+      setSummaryText(summary);
       return { success: true };
     } catch (error) {
       console.error("Error processing order:", error);
