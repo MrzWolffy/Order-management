@@ -35,12 +35,12 @@ export function useOrderManagement() {
   };
 
   const processOrder = async (
-    updateProductQuantities: (products: ProductMap) => Promise<void>
+    updateProductQuantities: (products: ProductMap) => Promise<string>
   ) => {
     setIsProcessingOrder(true);
     
     try {
-      await updateProductQuantities(selectedProducts);
+      const sessionUrl = await updateProductQuantities(selectedProducts);
       const summary = generateSummary(sessionUrl);
       setSummaryText(summary);
       return { success: true };
