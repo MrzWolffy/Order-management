@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { authorize , readSheet, updateStock } from "../Api/sheetApi";
+import { authorize , readSheet, updateStock, createUrl } from "../Api/sheetApi";
 import type { SheetData , ProductMap} from "../types";
 
 export function useSheetApi() {
@@ -65,7 +65,22 @@ const handleAuthClick = async () => {
       await updateStock(id, quantity);
     }
     await readSheetData();
-    setLoading(false);
+
+    const items = Object.values(selectedProducts).map(({ row, quantity }) => ({
+      id: row[0],
+      quantity: quantity,
+    }));
+
+    try {
+      const { sessionUrl } = await createUrl(items);
+      return sessionUrl;
+    } catch (error) {
+      console.error("Error creating session URL:", error);
+      alert("Failed to create session URL. Please try again.");
+    } finally { 
+      setLoading(false);
+    }
+    
   };
 
 
