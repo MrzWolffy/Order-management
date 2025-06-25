@@ -30,3 +30,13 @@ export async function updateStock(id: string, quantity: number) {
   if (!response.ok) throw new Error("Failed to update stock");
   return response.json();
 }
+
+export async function createUrl(items: { id: string; quantity: number }[]) {
+  const response = await fetch(`${API_BASE_URL}/sessionUrl`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(items),
+  });
+  if (!response.ok) throw new Error("Failed to create session URL");
+  return response.json();
+}

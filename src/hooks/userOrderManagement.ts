@@ -26,12 +26,12 @@ export function useOrderManagement() {
     });
   };
 
-  const generateSummary = () => {
+  const generateSummary = (sessionUrl?: string) => {
     const productInfo = Object.values(selectedProducts)
       .map((p) => `${p.row[0]} ${p.row[1]} [${p.row[2]} $] x${p.quantity}`)
       .join("\n");
 
-    return `🛒 Products:\n${productInfo}\n✅ Order confirmed and inventory updated!`;
+    return `🛒 Products:\n${productInfo}\n✅ Order confirmed!\n🔗 Checkout: ${sessionUrl}`;
   };
 
   const processOrder = async (
@@ -41,7 +41,7 @@ export function useOrderManagement() {
     
     try {
       await updateProductQuantities(selectedProducts);
-      const summary = generateSummary();
+      const summary = generateSummary(sessionUrl);
       setSummaryText(summary);
       return { success: true };
     } catch (error) {
