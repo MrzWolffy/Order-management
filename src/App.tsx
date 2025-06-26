@@ -8,6 +8,7 @@ import { ProductSearch } from "./components/ProductSearch";
 import { SelectedProducts } from "./components/SelectedProduct";
 import { OrderSummary } from "./components/OrderSummary";
 import { CreateDiscount } from "./components/CreatedDiscount";
+import { useNavigate } from "react-router-dom";
 
 function App() {
   const {
@@ -31,7 +32,7 @@ function App() {
     copyToClipboard,
   } = useOrderManagement();
 
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const stockStatus = validateStock(
     selectedProducts,
@@ -65,9 +66,9 @@ function App() {
 
   return (
     <>
-      {/* <button onClick={() => navigate("/status")} className="navigateButtons">
+      {<button onClick={() => navigate("/status")} className="navigateButtons">
         Status
-      </button> */}
+      </button>}
       <div className="container">
         <AuthSection
           isAuthorized={isAuthorized}
