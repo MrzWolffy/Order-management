@@ -7,6 +7,7 @@ import { AuthSection } from "./components/AuthSection";
 import { ProductSearch } from "./components/ProductSearch";
 import { SelectedProducts } from "./components/SelectedProduct";
 import { OrderSummary } from "./components/OrderSummary";
+import { CreateDiscount } from "./components/CreatedDiscount";
 
 function App() {
   const {
@@ -36,6 +37,8 @@ function App() {
     selectedProducts,
     sheetData ?? { values: [] }
   );
+
+
 
   const handleConfirm = async () => {
     const hasProducts = Object.keys(selectedProducts).length > 0;
@@ -87,6 +90,10 @@ function App() {
           sheetData={sheetData ?? { values: [] }}
           onDeleteProduct={handleDeleteProduct}
         />
+
+        <br />
+
+        <CreateDiscount />
 
         <br />
 

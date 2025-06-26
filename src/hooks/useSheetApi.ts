@@ -33,6 +33,7 @@ const handleAuthClick = async () => {
     } else {
       setIsAuthorized(true);
     }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     alert("Authorization failed");
     setIsAuthorized(false);
