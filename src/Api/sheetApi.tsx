@@ -31,11 +31,25 @@ export async function updateStock(id: string, quantity: number) {
   return response.json();
 }
 
-export async function createUrl(items: { id: string; quantity: number }[]) {
+export async function createUrl(
+  items: { id: string; quantity: number }[], 
+  discount?: { discountAmount: number; type: "%" | "$" } | null
+) {
+  // Prepare the request body
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const requestBody: any[] = [...items];
+  
+  // Add discount to the request if it exists
+  if (discount && discount.discountAmount > 0) {
+    requestBody.push({
+      discount: discount.discountAmount,
+      type: discount.type
+    });
+  }
   const response = await fetch(`${API_BASE_URL}/sessionUrl`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(items),
+    body: JSON.stringify(requestBody),
   });
   if (!response.ok) throw new Error("Failed to create session URL");
   return response.json();
