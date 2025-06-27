@@ -7,6 +7,16 @@ export function useSheetApi() {
   const [sheetData, setSheetData] = useState<SheetData | null>(null);
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    if (token) {
+      localStorage.setItem('jwt', token);
+      window.history.replaceState({}, document.title, window.location.pathname);
+      setIsAuthorized(true);
+    }
+  }, []);
+
     useEffect(() => {
     const checkAuth = async () => {
       setLoading(true);
@@ -43,8 +53,10 @@ const handleAuthClick = async () => {
 };
 
   const handleSignoutClick = () => {
-    setIsAuthorized(false);
-  };
+  localStorage.removeItem('jwt');
+  setIsAuthorized(false);
+
+};
 
   const readSheetData = async () => {
     setLoading(true);
