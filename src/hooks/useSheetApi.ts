@@ -62,6 +62,7 @@ const handleAuthClick = async () => {
 };
 
   const handleSignoutClick = () => {
+  localStorage.removeItem('jwt');
   setIsAuthorized(false);
 
 };
