@@ -69,7 +69,7 @@ export function useOrderManagement() {
   const totalInfo = `\n${discountInfo}\n💵 Total: $${totals.total.toFixed(2)}`;
   const orderInfo = orderId ? `\n📄 Order ID: ${orderId}` : "";
   
-  return `🛒 Products:\n${orderInfo}${productInfo}${totalInfo}\n✅ Order confirmed!\n🔗 Checkout: ${sessionUrl}`;
+  return `${orderInfo}\n🛒 Products:\n${productInfo}${totalInfo}\n✅ Order confirmed!\n🔗 Checkout: ${sessionUrl}`;
 };
 
 const processOrder = async (
