@@ -146,58 +146,114 @@ export function ProductSearch({
             return (
               <li key={idx}>
                 <div className="dropdown-row-content">
-                  <span className="product-id">
-                    {currentVariant[0]}
-                  </span>
-                  <span className="product-title">
-                    {currentVariant[1]}
-                  </span>
-                  
-                  {hasMultipleColors && (
-                    <select
-                      className="color-select"
-                      value={selectedColors[idx] || "Default"}
-                      onChange={(e) => handleColorChange(idx, e.target.value)}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {availableColors.map((color) => (
-                        <option key={color} value={color}>
-                          {color || "Default"}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-                  
-                  {!hasMultipleColors && (
-                    <span className="color-badge">
-                      {currentVariant[2] || "Default"}
+                  {/* Desktop layout - all in one row */}
+                  <div className="desktop-layout" style={{ display: 'flex', alignItems: 'center', gap: '12px', width: '100%' }}>
+                    <span className="product-id">
+                      {currentVariant[0]}
                     </span>
-                  )}
+                    <span className="product-title">
+                      {currentVariant[1]}
+                    </span>
+                    
+                    {hasMultipleColors && (
+                      <select
+                        className="color-select"
+                        value={selectedColors[idx] || "Default"}
+                        onChange={(e) => handleColorChange(idx, e.target.value)}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {availableColors.map((color) => (
+                          <option key={color} value={color}>
+                            {color || "Default"}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                    
+                    {!hasMultipleColors && (
+                      <span className="color-badge">
+                        {currentVariant[2] || "Default"}
+                      </span>
+                    )}
+                    
+                    <span className="product-price">
+                      ${currentVariant[3]}
+                    </span>
+                    <span className="product-stock">
+                      Stock: {currentVariant[4]}
+                    </span>
+                    <input
+                      type="number"
+                      className="quantity-input"
+                      min={1}
+                      max={parseInt(currentVariant[4] || "1", 10)}
+                      value={quantities[idx] || 1}
+                      onChange={(e) =>
+                        handleQuantityChange(idx, Number(e.target.value))
+                      }
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                    <button
+                      className="add-product-btn"
+                      onClick={() => handleSelectProduct(currentVariant, idx)}
+                      type="button"
+                    >
+                      Add
+                    </button>
+                  </div>
                   
-                  <span className="product-price">
-                    ${currentVariant[3]}
-                  </span>
-                  <span className="product-stock">
-                    Stock: {currentVariant[4]}
-                  </span>
-                  <input
-                    type="number"
-                    className="quantity-input"
-                    min={1}
-                    max={parseInt(currentVariant[4] || "1", 10)}
-                    value={quantities[idx] || 1}
-                    onChange={(e) =>
-                      handleQuantityChange(idx, Number(e.target.value))
-                    }
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                  <button
-                    className="add-product-btn"
-                    onClick={() => handleSelectProduct(currentVariant, idx)}
-                    type="button"
-                  >
-                    Add
-                  </button>
+                  {/* Mobile layout - stacked */}
+                  <div className="mobile-layout" style={{ display: 'none', width: '100%' }}>
+                    <div className="product-title">
+                      {currentVariant[1]}
+                    </div>
+                    <div className="mobile-product-row">
+                      <span className="product-id">ID: {currentVariant[0]}</span>
+                      <span className="product-price">${currentVariant[3]}</span>
+                      <span className="product-stock">Stock: {currentVariant[4]}</span>
+                    </div>
+                    <div className="mobile-controls-row">
+                      {hasMultipleColors && (
+                        <select
+                          className="color-select"
+                          value={selectedColors[idx] || "Default"}
+                          onChange={(e) => handleColorChange(idx, e.target.value)}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {availableColors.map((color) => (
+                            <option key={color} value={color}>
+                              {color || "Default"}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                      
+                      {!hasMultipleColors && (
+                        <span className="color-badge">
+                          {currentVariant[2] || "Default"}
+                        </span>
+                      )}
+                      
+                      <input
+                        type="number"
+                        className="quantity-input"
+                        min={1}
+                        max={parseInt(currentVariant[4] || "1", 10)}
+                        value={quantities[idx] || 1}
+                        onChange={(e) =>
+                          handleQuantityChange(idx, Number(e.target.value))
+                        }
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                      <button
+                        className="add-product-btn"
+                        onClick={() => handleSelectProduct(currentVariant, idx)}
+                        type="button"
+                      >
+                        Add
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </li>
             );
