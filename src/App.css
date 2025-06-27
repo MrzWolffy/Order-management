@@ -48,6 +48,16 @@
   border-radius: 8px;
 }
 
+/* Mobile responsive search box */
+@media (max-width: 768px) {
+  .search-box {
+    width: 90%;
+    margin: 0.5em;
+    padding: 0.8em;
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+}
+
 .no-products {
   text-align: center;
   color: #888;
@@ -95,51 +105,248 @@
   resize: vertical;
 }
 
-.search-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-  width: 100%;
-}
-
-.search-box {
-  width: 70%;
-  margin: 1em 1em;
-  padding: 1em;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-}
-
 .dropdown {
   list-style-type: none;
   padding: 0;
   margin: 0;
   position: absolute;
   top: 100%;
-  width: auto; /* allow content width */
-  max-width: 90vw; /* prevent overflow */
-  max-height: 200px;
+  width: max-content; /* Fit content width */
+  min-width: 300px; /* Reduced minimum width for mobile */
+  max-width: 95vw; /* Prevent overflow on small screens */
+  max-height: 300px; /* Increased height for color selection rows */
   overflow-y: auto;
+  overflow-x: auto; /* Allow horizontal scrolling on mobile */
   border: 1px solid #ccc;
   border-radius: 8px;
   background-color: white;
   z-index: 1000;
   white-space: nowrap;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Added shadow for better visibility */
+}
+
+/* Mobile responsive styles */
+@media (max-width: 768px) {
+  .dropdown {
+    min-width: 280px;
+    max-width: 98vw;
+    left: 50%;
+    transform: translateX(-50%); /* Center the dropdown on mobile */
+  }
 }
 
 .dropdown li {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 12px;
-  gap: 1em;
+  display: block; /* Changed from flex to block */
+  padding: 12px 16px; /* Increased padding for better spacing */
   cursor: pointer;
   white-space: nowrap;
+  border-bottom: 1px solid #eee; /* Added separator between items */
+}
+
+.dropdown li:last-child {
+  border-bottom: none; /* Remove border from last item */
 }
 
 .dropdown li:hover {
   background-color: #f0f0f0;
+}
+
+/* New styles for dropdown row content */
+.dropdown-row-content {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Reduced gap for better mobile fit */
+  flex-wrap: nowrap; /* Keep everything on same line */
+  width: 100%;
+  overflow-x: auto; /* Allow horizontal scrolling if needed */
+  padding-right: 8px; /* Add some padding for scroll */
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .dropdown-row-content {
+    gap: 6px; /* Even smaller gap on mobile */
+    font-size: 14px; /* Smaller font size */
+  }
+}
+
+/* Color selection dropdown styles */
+.color-select {
+  min-width: 80px;
+  max-width: 120px; /* Limit max width */
+  padding: 4px 6px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  background-color: white;
+  font-size: 13px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.color-select:hover {
+  border-color: #007bff;
+}
+
+.color-select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+/* Color badge for single-color products */
+.color-badge {
+  background-color: #f0f0f0;
+  padding: 3px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  min-width: 50px;
+  max-width: 80px;
+  text-align: center;
+  color: #666;
+  border: 1px solid #ddd;
+  flex-shrink: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Mobile responsive adjustments for color elements */
+@media (max-width: 768px) {
+  .color-select {
+    min-width: 60px;
+    max-width: 90px;
+    padding: 3px 4px;
+    font-size: 11px;
+  }
+  
+  .color-badge {
+    padding: 2px 4px;
+    font-size: 10px;
+    min-width: 40px;
+    max-width: 60px;
+  }
+}
+
+/* Product info spans */
+.product-id {
+  font-weight: bold;
+  min-width: 30px;
+  color: #333;
+  flex-shrink: 0; /* Prevent shrinking */
+}
+
+.product-title {
+  min-width: 120px;
+  max-width: 200px; /* Limit max width */
+  flex: 1;
+  text-align: left;
+  color: #444;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Add ellipsis for long titles */
+}
+
+.product-price {
+  color: #28a745;
+  font-weight: bold;
+  min-width: 50px;
+  flex-shrink: 0;
+}
+
+.product-stock {
+  color: #666;
+  min-width: 60px;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+/* Mobile responsive adjustments for product info */
+@media (max-width: 768px) {
+  .product-id {
+    min-width: 25px;
+    font-size: 12px;
+  }
+  
+  .product-title {
+    min-width: 80px;
+    max-width: 120px;
+    font-size: 12px;
+  }
+  
+  .product-price {
+    min-width: 40px;
+    font-size: 12px;
+  }
+  
+  .product-stock {
+    min-width: 50px;
+    font-size: 11px;
+  }
+}
+
+/* Quantity input in dropdown */
+.quantity-input {
+  width: 50px;
+  padding: 4px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.quantity-input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+/* Add button in dropdown */
+.add-product-btn {
+  padding: 5px 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.add-product-btn:hover {
+  background-color: #0056b3;
+}
+
+.add-product-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+/* Mobile responsive adjustments for input and button */
+@media (max-width: 768px) {
+  .quantity-input {
+    width: 40px;
+    padding: 3px;
+    font-size: 11px;
+  }
+  
+  .add-product-btn {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+}
+
+/* No results message styling */
+.no-results-message {
+  padding: 10px;
+  color: #666;
+  font-style: italic;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-top: 5px;
+  background-color: #f9f9f9;
+  text-align: center;
 }
 
 .product-container {
