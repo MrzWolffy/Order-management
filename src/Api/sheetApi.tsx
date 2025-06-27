@@ -1,5 +1,9 @@
 const API_BASE_URL = "https://stripe-checkout-backend-production-442a.up.railway.app/api"; // Change if your backend runs elsewhere
 
+function getJWT() {
+  return localStorage.getItem('jwt') || '';
+}
+
 export async function authorize() {
   const response = await fetch(`${API_BASE_URL}/authorize`, {
     method: "GET",
@@ -15,7 +19,10 @@ export async function authorize() {
 export async function readSheet() {
   const response = await fetch(`${API_BASE_URL}/readSheet`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { 
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${getJWT()}`
+    },
   });
   if (!response.ok) throw new Error("Failed to read sheet");
   return response.json();
@@ -24,7 +31,7 @@ export async function readSheet() {
 export async function updateStock(id: string, quantity: number) {
   const response = await fetch(`${API_BASE_URL}/updateStock`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json" ,"Authorization": `Bearer ${getJWT()}`},
     body: JSON.stringify({ id, quantity }),
   });
   if (!response.ok) throw new Error("Failed to update stock");
@@ -34,7 +41,7 @@ export async function updateStock(id: string, quantity: number) {
 export async function createUrl(items: { id: string; quantity: number }[]) {
   const response = await fetch(`${API_BASE_URL}/sessionUrl`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json" , "Authorization": `Bearer ${getJWT()}`},
     body: JSON.stringify(items),
   });
   if (!response.ok) throw new Error("Failed to create session URL");
