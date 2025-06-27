@@ -73,7 +73,7 @@ const handleAuthClick = async () => {
   const updateProductQuantities = async (
   selectedProducts: ProductMap, 
   discount?: Discount | null
-): Promise<string> => {
+): Promise<{ sessionUrl: string; ReceiptId: string }> => {
   setLoading(true);
   
   // Update stock for each product
@@ -93,8 +93,8 @@ const handleAuthClick = async () => {
 
   try {
     // Pass discount to createUrl function
-    const { sessionUrl } = await createUrl(items, discount);
-    return sessionUrl;
+    const { sessionUrl, ReceiptId } = await createUrl(items, discount);
+    return { sessionUrl, ReceiptId };
   } catch (error) {
     console.error("Error creating session URL:", error);
     alert("Failed to create session URL. Please try again.");

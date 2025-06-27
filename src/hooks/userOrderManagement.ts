@@ -54,40 +54,41 @@ export function useOrderManagement() {
     };
   };
 
-  const generateSummary = (sessionUrl?: string) => {
-    const productInfo = Object.values(selectedProducts)
-      .map((p) => `${p.row[0]} ${p.row[1]} [color: ${p.row[2]}] [${p.row[3]} $] x${p.quantity}`)
-      .join("\n");
-    
-    const totals = calculateTotal();
-    
-    let discountInfo = "";
-    if (currentDiscount && currentDiscount.discountAmount > 0) {
-      discountInfo = `\n💰 Discount: ${currentDiscount.discountAmount}${currentDiscount.type} (-$${totals.discount.toFixed(2)})`;
-    }
-    
-    const totalInfo = `\n${discountInfo}\n💵 Total: $${totals.total.toFixed(2)}`;
-    
-    return `🛒 Products:\n${productInfo}${totalInfo}\n✅ Order confirmed!\n🔗 Checkout: ${sessionUrl}`;
-  };
+  const generateSummary = (sessionUrl?: string, orderId?: string) => {
+  const productInfo = Object.values(selectedProducts)
+    .map((p) => `${p.row[0]} ${p.row[1]} [color: ${p.row[2]}] [${p.row[3]} $] x${p.quantity}`)
+    .join("\n");
+  
+  const totals = calculateTotal();
+  
+  let discountInfo = "";
+  if (currentDiscount && currentDiscount.discountAmount > 0) {
+    discountInfo = `\n💰 Discount: ${currentDiscount.discountAmount}${currentDiscount.type} (-$${totals.discount.toFixed(2)})`;
+  }
+  
+  const totalInfo = `\n${discountInfo}\n💵 Total: $${totals.total.toFixed(2)}`;
+  const orderInfo = orderId ? `\n📄 Order ID: ${orderId}` : "";
+  
+  return `🛒 Products:\n${orderInfo}${productInfo}${totalInfo}\n✅ Order confirmed!\n🔗 Checkout: ${sessionUrl}`;
+};
 
-  const processOrder = async (
-    updateProductQuantities: (products: ProductMap, discount?: Discount | null) => Promise<string>
-  ) => {
-    setIsProcessingOrder(true);
-    
-    try {
-      const sessionUrl = await updateProductQuantities(selectedProducts, currentDiscount);
-      const summary = generateSummary(sessionUrl);
-      setSummaryText(summary);
-      return { success: true };
-    } catch (error) {
-      console.error("Error processing order:", error);
-      return { success: false, error };
-    } finally {
-      setIsProcessingOrder(false);
-    }
-  };
+const processOrder = async (
+  updateProductQuantities: (products: ProductMap, discount?: Discount | null) => Promise<{ sessionUrl: string; ReceiptId: string }>
+) => {
+  setIsProcessingOrder(true);
+  
+  try {
+    const { sessionUrl, ReceiptId } = await updateProductQuantities(selectedProducts, currentDiscount);
+    const summary = generateSummary(sessionUrl, ReceiptId);
+    setSummaryText(summary);
+    return { success: true };
+  } catch (error) {
+    console.error("Error processing order:", error);
+    return { success: false, error };
+  } finally {
+    setIsProcessingOrder(false);
+  }
+};
 
   const clearOrder = () => {
     setSelectedProducts({});
