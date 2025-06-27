@@ -16,6 +16,18 @@ export async function authorize() {
   return response.json();
 }
 
+export async function first_authorize() {
+  const response = await fetch(`${API_BASE_URL}/public-auth-url`, {
+    method: "GET",
+    headers: { 
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${getJWT()}`
+    },
+  });
+  if (!response.ok) throw new Error("Failed to authorize");
+  return response.json();
+}
+
 export async function readSheet() {
   const response = await fetch(`${API_BASE_URL}/readSheet`, {
     method: "POST",

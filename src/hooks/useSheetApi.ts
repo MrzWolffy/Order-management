@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { authorize , readSheet, updateStock, createUrl, getJWT } from "../Api/sheetApi";
+import { authorize , readSheet, updateStock, createUrl, getJWT , first_authorize} from "../Api/sheetApi";
 import type { SheetData , ProductMap, Discount} from "../types";
 
 export function useSheetApi() {
@@ -40,17 +40,18 @@ const handleAuthClick = async () => {
   setLoading(true);
   try {
     if (!getJWT()) {
-      const result = await authorize();
+      const result = await first_authorize();
       if (result.authUrl) {
         window.location.href = result.authUrl;
         return;
       }
-    }
-    const result = await authorize();
-    if (result.authUrl) {
-      window.location.href = result.authUrl;
     } else {
-      setIsAuthorized(true);
+      const result = await authorize();
+      if (result.authUrl) {
+        window.location.href = result.authUrl;
+      } else {
+        setIsAuthorized(true);
+      }
     }
   } catch (error) {
     alert("Authorization failed");
