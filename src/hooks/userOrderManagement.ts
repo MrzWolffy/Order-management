@@ -32,7 +32,7 @@ export function useOrderManagement() {
 
   const calculateTotal = () => {
     const subtotal = Object.values(selectedProducts).reduce((total, product) => {
-      const price = parseFloat(product.row[2]) || 0;
+      const price = parseFloat(product.row[3]) || 0;
       return total + (price * product.quantity);
     }, 0);
 
@@ -56,7 +56,7 @@ export function useOrderManagement() {
 
   const generateSummary = (sessionUrl?: string) => {
     const productInfo = Object.values(selectedProducts)
-      .map((p) => `${p.row[0]} ${p.row[1]} [${p.row[2]} $] x${p.quantity}`)
+      .map((p) => `${p.row[0]} ${p.row[1]} [color: ${p.row[2]}] [${p.row[3]} $] x${p.quantity}`)
       .join("\n");
     
     const totals = calculateTotal();

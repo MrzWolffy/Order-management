@@ -50,7 +50,7 @@ export function SelectedProducts({ selectedProducts, sheetData, onDeleteProduct 
               return sheetRow[0] === data.row[0] && sheetRow[1] === data.row[1];
             });
             if (rowIndex !== -1) {
-              currentStock = parseInt(sheetData.values[rowIndex][3] || "0", 10);
+              currentStock = parseInt(sheetData.values[rowIndex][4] || "0", 10);
             }
           }
           
@@ -64,7 +64,8 @@ export function SelectedProducts({ selectedProducts, sheetData, onDeleteProduct 
               <span className="product-name">
                 <span style={{ marginRight: "1em" }}>{data.row[0]}</span>
                 <span style={{ marginRight: "1em" }}>{data.row[1]}</span>
-                <span>[{data.row[2]} $]</span>
+                <span style={{ marginRight: "1em" }}>color: {data.row[2]}</span>
+                <span>[{data.row[3]} $]</span>
               </span>
               <div className="product-actions">
                 <span className="product-qty">x{data.quantity}</span>

@@ -14,6 +14,8 @@ export function ProductSearch({
   const [search, setSearch] = useState("");
   const [filteredRows, setFilteredRows] = useState<string[][]>([]);
   const [quantities, setQuantities] = useState<{ [key: number]: number }>({});
+  const [selectedColors, setSelectedColors] = useState<{ [key: number]: string }>({});
+  const [productVariants, setProductVariants] = useState<{ [key: number]: string[][] }>({});
 
   useEffect(() => {
     console.log("sheetData:", sheetData); // Log the whole sheetData object
@@ -23,83 +25,190 @@ export function ProductSearch({
       setFilteredRows([]);
       return;
     }
+
     if (!search) {
       setFilteredRows([]);
       return;
     }
 
-    const rows = sheetData.values
-      .slice(1)
-      .filter((row: string[]) => {
-        const matchesSearch = row.some(
-          (cell) => cell && cell.toLowerCase().includes(search.toLowerCase())
-        );
-        const currentStock = parseInt(row[3] || "0", 10);
-        const hasStock = currentStock > 0;
-        return matchesSearch && hasStock;
-      })
-      .map((row: string[]) => [row[0], row[1], row[2], row[3]]);
+    const productGroups: { [key: string]: string[][] } = {};
+    
+    sheetData.values
+      .slice(1) // Skip header
+      .forEach((row: string[]) => {
+        const productName = row[1]?.toLowerCase() || "";
+        if (productName.includes(search.toLowerCase())) {
+          const currentStock = parseInt(row[4] || "0", 10);
+          if (currentStock > 0) {
+            if (!productGroups[productName]) {
+              productGroups[productName] = [];
+            }
+            productGroups[productName].push([row[0], row[1], row[2], row[3], row[4]]);
+          }
+        }
+      });
+
+    // Create filtered rows (one row per unique product name)
+    const rows: string[][] = [];
+    const variants: { [key: number]: string[][] } = {};
+    const defaultColors: { [key: number]: string } = {};
+
+    Object.values(productGroups).forEach((group, idx) => {
+      // Sort variants by color (Default first, then alphabetically)
+      const sortedVariants = group.sort((a, b) => {
+        const colorA = a[2] || "Default";
+        const colorB = b[2] || "Default";
+        if (colorA === "Default" && colorB !== "Default") return -1;
+        if (colorA !== "Default" && colorB === "Default") return 1;
+        return colorA.localeCompare(colorB);
+      });
+      
+      // Use the first variant (default color) as the main row
+      const mainVariant = sortedVariants[0];
+      rows.push(mainVariant);
+      variants[idx] = sortedVariants;
+      defaultColors[idx] = mainVariant[2] || "Default";
+    });
 
     console.log("Filtered rows:", rows);
+    console.log("Product variants:", variants);
 
     setFilteredRows(rows);
+    setProductVariants(variants);
+    setSelectedColors(defaultColors);
   }, [sheetData, search]);
 
   const handleQuantityChange = (idx: number, value: number) => {
     setQuantities((prev) => ({ ...prev, [idx]: value }));
   };
 
+  const handleColorChange = (idx: number, color: string) => {
+    setSelectedColors((prev) => ({ ...prev, [idx]: color }));
+    
+    // Update the row data when color changes
+    const variants = productVariants[idx] || [];
+    const selectedVariant = variants.find(variant => (variant[2] || "Default") === color);
+    
+    if (selectedVariant) {
+      setFilteredRows(prevRows => {
+        const newRows = [...prevRows];
+        newRows[idx] = selectedVariant;
+        return newRows;
+      });
+    }
+  };
+
   const handleSelectProduct = (row: string[], idx: number) => {
     const quantity = quantities[idx] || 1;
-    onProductSelect(row, quantity);
+    // Get the currently selected variant for this product
+    const selectedColor = selectedColors[idx] || "Default";
+    const variants = productVariants[idx] || [];
+    const selectedVariant = variants.find(variant => (variant[2] || "Default") === selectedColor) || row;
+    
+    onProductSelect(selectedVariant, quantity);
     setSearch("");
     setFilteredRows([]);
     setQuantities({});
+    setSelectedColors({});
+    setProductVariants({});
+  };
+
+  const getAvailableColors = (idx: number): string[] => {
+    const variants = productVariants[idx] || [];
+    return variants.map(variant => variant[2] || "Default");
+  };
+
+  const getCurrentVariant = (idx: number): string[] => {
+    const selectedColor = selectedColors[idx] || "Default";
+    const variants = productVariants[idx] || [];
+    return variants.find(variant => (variant[2] || "Default") === selectedColor) || filteredRows[idx];
   };
 
   return (
     <div className="search-wrapper">
       <input
         type="text"
-        placeholder="Name product"
+        placeholder="Search products..."
         className="search-box"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         onFocus={onFocus}
+        style={{ width: "100%" }}
       />
+      
       {search && filteredRows.length > 0 && (
         <ul className="dropdown">
-          {filteredRows.map((row, idx) => (
-            <li
-              key={idx}
-              className="dropdown-row"
-              style={{ marginLeft: "1em" }}
-            >
-              <span>{row[0]}</span>
-              <span style={{ marginLeft: "1em" }}>{row[1]}</span>
-              <span style={{ marginLeft: "1em" }}>[{row[2]} $]</span>
-              <span style={{ marginLeft: "1em" }}>Stock: {row[3]}</span>
-              <input
-                type="number"
-                min={1}
-                max={parseInt(row[3] || "1", 10)}
-                value={quantities[idx] || 1}
-                onChange={(e) =>
-                  handleQuantityChange(idx, Number(e.target.value))
-                }
-                style={{ width: 50, marginLeft: "1em" }}
-                onClick={(e) => e.stopPropagation()} // Prevents bubbling to li
-              />
-              <button
-                style={{ marginLeft: "1em" }}
-                onClick={() => handleSelectProduct(row, idx)}
-                type="button"
-              >
-                Add
-              </button>
-            </li>
-          ))}
+          {filteredRows.map((row, idx) => {
+            const currentVariant = getCurrentVariant(idx);
+            const availableColors = getAvailableColors(idx);
+            const hasMultipleColors = availableColors.length > 1;
+            
+            return (
+              <li key={idx}>
+                <div className="dropdown-row-content">
+                  <span className="product-id">
+                    {currentVariant[0]}
+                  </span>
+                  <span className="product-title">
+                    {currentVariant[1]}
+                  </span>
+                  
+                  {hasMultipleColors && (
+                    <select
+                      className="color-select"
+                      value={selectedColors[idx] || "Default"}
+                      onChange={(e) => handleColorChange(idx, e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {availableColors.map((color) => (
+                        <option key={color} value={color}>
+                          {color || "Default"}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                  
+                  {!hasMultipleColors && (
+                    <span className="color-badge">
+                      {currentVariant[2] || "Default"}
+                    </span>
+                  )}
+                  
+                  <span className="product-price">
+                    ${currentVariant[3]}
+                  </span>
+                  <span className="product-stock">
+                    Stock: {currentVariant[4]}
+                  </span>
+                  <input
+                    type="number"
+                    className="quantity-input"
+                    min={1}
+                    max={parseInt(currentVariant[4] || "1", 10)}
+                    value={quantities[idx] || 1}
+                    onChange={(e) =>
+                      handleQuantityChange(idx, Number(e.target.value))
+                    }
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                  <button
+                    className="add-product-btn"
+                    onClick={() => handleSelectProduct(currentVariant, idx)}
+                    type="button"
+                  >
+                    Add
+                  </button>
+                </div>
+              </li>
+            );
+          })}
         </ul>
+      )}
+      
+      {search && filteredRows.length === 0 && (
+        <div className="no-results-message">
+          No products found matching your search.
+        </div>
       )}
     </div>
   );
