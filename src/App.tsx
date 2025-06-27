@@ -1,12 +1,12 @@
 import "./App.css";
 import { useSheetApi } from "./hooks/useSheetApi";
-// import { BrowserRouter as Router, useNavigate } from "react-router-dom";
 import { useOrderManagement } from "./hooks/userOrderManagement";
 import { validateStock } from "./utils/stockValidation";
 import { AuthSection } from "./components/AuthSection";
 import { ProductSearch } from "./components/ProductSearch";
 import { SelectedProducts } from "./components/SelectedProduct";
 import { OrderSummary } from "./components/OrderSummary";
+import { CreateDiscount } from "./components/CreatedDiscount";
 import { useNavigate } from "react-router-dom";
 
 function App() {
@@ -24,11 +24,14 @@ function App() {
     selectedProducts,
     summaryText,
     isProcessingOrder,
+    currentDiscount,
     handleSelectProduct,
     handleDeleteProduct,
+    handleDiscountChange,
     processOrder,
     clearOrder,
     copyToClipboard,
+    calculateTotal,
   } = useOrderManagement();
 
   const navigate = useNavigate();
@@ -37,6 +40,8 @@ function App() {
     selectedProducts,
     sheetData ?? { values: [] }
   );
+
+  const totals = calculateTotal();
 
   const handleConfirm = async () => {
     const hasProducts = Object.keys(selectedProducts).length > 0;
@@ -63,9 +68,9 @@ function App() {
 
   return (
     <>
-      {<button onClick={() => navigate("/status")} className="navigateButtons">
+      <button onClick={() => navigate("/status")} className="navigateButtons">
         Status
-      </button>}
+      </button>
       <div className="container">
         <AuthSection
           isAuthorized={isAuthorized}
@@ -88,6 +93,32 @@ function App() {
           sheetData={sheetData ?? { values: [] }}
           onDeleteProduct={handleDeleteProduct}
         />
+
+        <br />
+
+        <CreateDiscount onDiscountChange={handleDiscountChange} />
+
+        {/* Show order totals preview */}
+        {Object.keys(selectedProducts).length > 0 && (
+          <div style={{ 
+            margin: "20px 0", 
+            padding: "15px", 
+            border: "1px solid #ddd", 
+            borderRadius: "5px",
+            backgroundColor: "#f9f9f9"
+          }}>
+            <h3>Order Summary Preview</h3>
+            <div>Subtotal: ${totals.subtotal.toFixed(2)}</div>
+            {currentDiscount && totals.discount > 0 && (
+              <div style={{ color: "green" }}>
+                Discount ({currentDiscount.discountAmount}{currentDiscount.type}): -${totals.discount.toFixed(2)}
+              </div>
+            )}
+            <div style={{ fontWeight: "bold", fontSize: "1.1em" }}>
+              Total: ${totals.total.toFixed(2)}
+            </div>
+          </div>
+        )}
 
         <br />
 

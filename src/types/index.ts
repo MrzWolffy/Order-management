@@ -6,11 +6,7 @@ export interface SheetData {
   values?: string[][];
 }
 
-export interface CustomerInfo {
-    name: string;
-    surname: string;
-    street: string;
-    city: string;
-    state: string;
-    zip: string;
+export interface Discount {
+    discountAmount: number;
+    type: "%" | "$";
 }

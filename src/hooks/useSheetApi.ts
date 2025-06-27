@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { authorize , readSheet, updateStock, createUrl } from "../Api/sheetApi";
-import type { SheetData , ProductMap} from "../types";
+import type { SheetData , ProductMap, Discount} from "../types";
 
 export function useSheetApi() {
   const [isAuthorized, setIsAuthorized] = useState(false);
@@ -33,6 +33,7 @@ const handleAuthClick = async () => {
     } else {
       setIsAuthorized(true);
     }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     alert("Authorization failed");
     setIsAuthorized(false);
@@ -57,31 +58,39 @@ const handleAuthClick = async () => {
     }
   };
 
-  const updateProductQuantities = async (selectedProducts: ProductMap) => {
-    setLoading(true);
-    for (const key in selectedProducts) {
-      const { row, quantity } = selectedProducts[key];
-      const id = row[0];
-      await updateStock(id, quantity);
-    }
-    await readSheetData();
+  const updateProductQuantities = async (
+  selectedProducts: ProductMap, 
+  discount?: Discount | null
+): Promise<string> => {
+  setLoading(true);
+  
+  // Update stock for each product
+  for (const key in selectedProducts) {
+    const { row, quantity } = selectedProducts[key];
+    const id = row[0];
+    await updateStock(id, quantity);
+  }
+  
+  await readSheetData();
 
-    const items = Object.values(selectedProducts).map(({ row, quantity }) => ({
-      id: row[0],
-      quantity: quantity,
-    }));
+  // Prepare items for checkout
+  const items = Object.values(selectedProducts).map(({ row, quantity }) => ({
+    id: row[0],
+    quantity: quantity,
+  }));
 
-    try {
-      const { sessionUrl } = await createUrl(items);
-      return sessionUrl;
-    } catch (error) {
-      console.error("Error creating session URL:", error);
-      alert("Failed to create session URL. Please try again.");
-    } finally { 
-      setLoading(false);
-    }
-    
-  };
+  try {
+    // Pass discount to createUrl function
+    const { sessionUrl } = await createUrl(items, discount);
+    return sessionUrl;
+  } catch (error) {
+    console.error("Error creating session URL:", error);
+    alert("Failed to create session URL. Please try again.");
+    throw error; // Re-throw to handle in calling function
+  } finally { 
+    setLoading(false);
+  }
+};
 
 
 
