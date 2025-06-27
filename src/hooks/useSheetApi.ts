@@ -31,8 +31,8 @@ export function useSheetApi() {
         setLoading(false);
       }
     };
-    checkAuth();
-  }, []);
+    if (!isAuthorized) checkAuth();
+  }, [isAuthorized]);
 
 const handleAuthClick = async () => {
   setLoading(true);
