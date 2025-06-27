@@ -22,10 +22,12 @@ export function useSheetApi() {
       setLoading(true);
       try {
         const result = await authorize();
+        console.log("authorize() response:", result);
         if (!result.authUrl) {
           setIsAuthorized(true);
         }
-      } catch {
+      } catch (err) {
+        console.error("authorize() error:", err);
         setIsAuthorized(false);
       } finally {
         setLoading(false);
@@ -53,7 +55,6 @@ const handleAuthClick = async () => {
 };
 
   const handleSignoutClick = () => {
-  localStorage.removeItem('jwt');
   setIsAuthorized(false);
 
 };

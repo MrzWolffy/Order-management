@@ -7,12 +7,12 @@ function getJWT() {
 export async function authorize() {
   const response = await fetch(`${API_BASE_URL}/authorize`, {
     method: "GET",
-    headers: { "Content-Type": "application/json" },
+    headers: { 
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${getJWT()}`
+    },
   });
   if (!response.ok) throw new Error("Failed to authorize");
-  if (response.status === 200) {
-    console.log("Authorization successful");
-  }
   return response.json();
 }
 
