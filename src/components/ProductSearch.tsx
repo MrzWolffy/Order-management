@@ -138,7 +138,7 @@ export function ProductSearch({
       
       {search && filteredRows.length > 0 && (
         <ul className="dropdown">
-          {filteredRows.map((row, idx) => {
+          {filteredRows.map((_, idx) => {
             const currentVariant = getCurrentVariant(idx);
             const availableColors = getAvailableColors(idx);
             const hasMultipleColors = availableColors.length > 1;
