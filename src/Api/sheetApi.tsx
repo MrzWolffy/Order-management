@@ -1,6 +1,6 @@
 const API_BASE_URL = "https://stripe-checkout-backend-production-442a.up.railway.app/api"; // Change if your backend runs elsewhere
 
-function getJWT() {
+export function getJWT() {
   return localStorage.getItem('jwt') || '';
 }
 
