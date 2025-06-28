@@ -62,19 +62,6 @@ export async function updateStock(id: string, quantity: number) {
   return response.json();
 }
 
-export async function updateOrderStatus(orderId: string, status: "paid" | "failed" | "pending") {
-  const response = await fetch(`${API_BASE_URL}/updateOrderStatus`, {
-    method: "POST",
-    headers: { 
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${getJWT()}`
-    },
-    body: JSON.stringify({ orderId, status }),
-  });
-  if (!response.ok) throw new Error("Failed to update order status");
-  return response.json();
-}
-
 export async function createUrl(
   items: { id: string; quantity: number }[], 
   discount?: { discountAmount: number; type: "%" | "$" } | null

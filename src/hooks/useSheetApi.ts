@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { authorize , readSheet, updateStock, createUrl, getJWT , first_authorize} from "../Api/sheetApi";
-import type { SheetData , ProductMap, Discount} from "../types";
+import { authorize , readSheet, readStatus, updateStock, createUrl, getJWT , first_authorize} from "../Api/sheetApi";
+import type { SheetData , ProductMap, Discount, OrderHistoryItem} from "../types";
 
 export function useSheetApi() {
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [sheetData, setSheetData] = useState<SheetData | null>(null);
+  const [orderHistory, setOrderHistory] = useState<OrderHistoryItem[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -80,6 +81,36 @@ const handleAuthClick = async () => {
     }
   };
 
+  const readOrderHistory = async () => {
+    setLoading(true);
+    try {
+      const result = await readStatus();
+      const rawData = result.data.values || [];
+      
+      // Parse the filtered data (columns: ReceiptId, Products, Amount, Status, Timestamp)
+      const parsedOrders: OrderHistoryItem[] = rawData
+        .slice(1) // Skip header row
+        .map((row: string[]) => ({
+          receiptId: row[0] || "",
+          products: row[1] || "",
+          amount: parseFloat(row[2]) || 0,
+          status: row[3] || "",
+          timestamp: row[4] || "",
+        }))
+        .sort((a: { timestamp: string }, b: { timestamp: string }) => 
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        ); // Sort by newest first
+      
+      setOrderHistory(parsedOrders);
+      return parsedOrders;
+    } catch (error) {
+      console.error("Error reading order history:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const updateProductQuantities = async (
   selectedProducts: ProductMap, 
   discount?: Discount | null
@@ -121,7 +152,9 @@ const handleAuthClick = async () => {
     handleAuthClick,
     handleSignoutClick,
     sheetData, 
+    orderHistory,
     readSheetData,
+    readOrderHistory,
     updateProductQuantities,
     loading
   };

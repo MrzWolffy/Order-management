@@ -10,3 +10,11 @@ export interface Discount {
     discountAmount: number;
     type: "%" | "$";
 }
+
+export interface OrderHistoryItem {
+  receiptId: string;
+  products: string;
+  amount: number;
+  status: string;
+  timestamp: string;
+}

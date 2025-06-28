@@ -1,87 +1,23 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import "./App.css";
-
-interface OrderHistoryItem {
-  receiptId: string;
-  products: string;
-  amount: number;
-  status: string;
-  timestamp: string;
-}
+import type { OrderHistoryItem } from "./types";
+import { useSheetApi } from "./hooks/useSheetApi";
+import "./StatusPage.css";
 
 export function StatusPage() {
   const navigate = useNavigate();
-  const [orders, setOrders] = useState<OrderHistoryItem[]>([]);
+  const { orderHistory, readOrderHistory, loading } = useSheetApi();
   const [filteredOrders, setFilteredOrders] = useState<OrderHistoryItem[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   // Fetch order history data
   const fetchOrderHistory = async () => {
     try {
-      setLoading(true);
-      const response = await fetch("https://stripe-checkout-backend-production-442a.up.railway.app/api/status", {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem('jwt') || ''}`
-        },
-      });
-      
-      if (!response.ok) throw new Error("Failed to fetch order history");
-      
-      const data = await response.json();
-      const rawData = data.data.values || [];
-      
-      // Parse the filtered data (columns: ReceiptId, Products, Amount, Status, Timestamp)
-      const parsedOrders: OrderHistoryItem[] = rawData
-        .slice(1) // Skip header row
-        .map((row: string[]) => ({
-          receiptId: row[0] || "",
-          products: row[1] || "",
-          amount: parseFloat(row[2]) || 0,
-          status: row[3] || "",
-          timestamp: row[4] || "",
-        }))
-        .sort((a: { timestamp: string }, b: { timestamp: string }) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()); // Sort by newest first
-      
-      setOrders(parsedOrders);
-      setFilteredOrders(parsedOrders);
       setError("");
+      await readOrderHistory();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch data");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Update order status
-  const updateOrderStatus = async (orderId: string, newStatus: "paid" | "failed") => {
-    try {
-      const response = await fetch("https://stripe-checkout-backend-production-442a.up.railway.app/api/updateOrderStatus", {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem('jwt') || ''}`
-        },
-        body: JSON.stringify({ orderId, status: newStatus }),
-      });
-      
-      if (!response.ok) throw new Error("Failed to update status");
-      
-      // Update local state
-      const updatedOrders = orders.map(order => 
-        order.receiptId === orderId ? { ...order, status: newStatus } : order
-      );
-      setOrders(updatedOrders);
-      setFilteredOrders(updatedOrders.filter(order => 
-        order.receiptId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        order.products.toLowerCase().includes(searchTerm.toLowerCase())
-      ));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update status");
     }
   };
 
@@ -89,9 +25,9 @@ export function StatusPage() {
   const handleSearch = (term: string) => {
     setSearchTerm(term);
     if (term.trim() === "") {
-      setFilteredOrders(orders);
+      setFilteredOrders(orderHistory);
     } else {
-      const filtered = orders.filter(order => 
+      const filtered = orderHistory.filter(order => 
         order.receiptId.toLowerCase().includes(term.toLowerCase()) ||
         order.products.toLowerCase().includes(term.toLowerCase())
       );
@@ -102,8 +38,21 @@ export function StatusPage() {
   // Clear search
   const clearSearch = () => {
     setSearchTerm("");
-    setFilteredOrders(orders);
+    setFilteredOrders(orderHistory);
   };
+
+  // Update filtered orders when orderHistory changes
+  useEffect(() => {
+    if (searchTerm.trim() === "") {
+      setFilteredOrders(orderHistory);
+    } else {
+      const filtered = orderHistory.filter(order => 
+        order.receiptId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.products.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredOrders(filtered);
+    }
+  }, [orderHistory, searchTerm]);
 
   // Format timestamp
   const formatTimestamp = (timestamp: string) => {
@@ -115,13 +64,13 @@ export function StatusPage() {
     }
   };
 
-  // Get status color
-  const getStatusColor = (status: string) => {
+  // Get status CSS class
+  const getStatusClass = (status: string) => {
     switch (status.toLowerCase()) {
-      case "paid": return "#28a745";
-      case "failed": return "#dc3545";
-      case "pending": return "#ffc107";
-      default: return "#6c757d";
+      case "paid": return "status-badge status-paid";
+      case "failed": return "status-badge status-failed";
+      case "pending": return "status-badge status-pending";
+      default: return "status-badge status-default";
     }
   };
 
@@ -133,130 +82,70 @@ export function StatusPage() {
   }, []);
 
   return (
-    <div style={{ padding: "20px", maxWidth: "1200px", margin: "0 auto" }}>
-      <div style={{ marginBottom: "20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <button onClick={() => navigate("/")} className="navigateButtons">
+    <div className="status-page">
+      <div className="status-header">
+        <button onClick={() => navigate("/")} className="navigate-button">
           Order
         </button>
-        <h1>Order Status Management</h1>
-        <button onClick={fetchOrderHistory} style={{ padding: "8px 16px" }}>
+        <h1 className="status-title">Order Status Management</h1>
+        <button onClick={fetchOrderHistory} className="refresh-button">
           Refresh
         </button>
       </div>
       
       {/* Search Section */}
-      <div style={{ marginBottom: "20px", display: "flex", gap: "10px", alignItems: "center" }}>
+      <div className="search-section">
         <input 
           type="text" 
           placeholder="Search by Receipt ID or Product Name" 
           value={searchTerm}
           onChange={(e) => handleSearch(e.target.value)}
-          style={{ 
-            padding: "8px 12px", 
-            borderRadius: "4px", 
-            border: "1px solid #ddd",
-            minWidth: "300px"
-          }}
+          className="search-input"
         />
-        <button onClick={clearSearch} style={{ padding: "8px 16px" }}>
+        <button onClick={clearSearch} className="clear-button">
           Clear
         </button>
       </div>
 
       {error && (
-        <div style={{ 
-          color: "#dc3545", 
-          backgroundColor: "#f8d7da", 
-          padding: "10px", 
-          borderRadius: "4px", 
-          marginBottom: "20px" 
-        }}>
+        <div className="error-message">
           {error}
         </div>
       )}
 
       {loading ? (
-        <div style={{ textAlign: "center", padding: "40px" }}>Loading...</div>
+        <div className="loading">Loading...</div>
       ) : (
-        <div style={{ overflowX: "auto" }}>
-          <table style={{ 
-            width: "100%", 
-            borderCollapse: "collapse", 
-            backgroundColor: "white",
-            boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
-          }}>
-            <thead>
-              <tr style={{ backgroundColor: "#f8f9fa" }}>
-                <th style={{ padding: "12px", border: "1px solid #dee2e6", textAlign: "left" }}>Receipt ID</th>
-                <th style={{ padding: "12px", border: "1px solid #dee2e6", textAlign: "left" }}>Products</th>
-                <th style={{ padding: "12px", border: "1px solid #dee2e6", textAlign: "left" }}>Amount</th>
-                <th style={{ padding: "12px", border: "1px solid #dee2e6", textAlign: "left" }}>Status</th>
-                <th style={{ padding: "12px", border: "1px solid #dee2e6", textAlign: "left" }}>Timestamp</th>
-                <th style={{ padding: "12px", border: "1px solid #dee2e6", textAlign: "left" }}>Actions</th>
+        <div className="table-container">
+          <table className="orders-table">
+            <thead className="table-header">
+              <tr>
+                <th>Receipt ID</th>
+                <th>Products</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Timestamp</th>
               </tr>
             </thead>
             <tbody>
-              {filteredOrders.map((order, index) => (
-                <tr key={order.receiptId} style={{ backgroundColor: index % 2 === 0 ? "#f8f9fa" : "white" }}>
-                  <td style={{ padding: "12px", border: "1px solid #dee2e6" }}>{order.receiptId}</td>
-                  <td style={{ padding: "12px", border: "1px solid #dee2e6", maxWidth: "300px" }}>
-                    <div style={{ 
-                      overflow: "hidden", 
-                      textOverflow: "ellipsis", 
-                      whiteSpace: "nowrap",
-                      fontSize: "14px"
-                    }}>
+              {filteredOrders.map((order) => (
+                <tr key={order.receiptId} className="table-row">
+                  <td className="table-cell">{order.receiptId}</td>
+                  <td className="table-cell product-cell">
+                    <div className="product-text">
                       {order.products}
                     </div>
                   </td>
-                  <td style={{ padding: "12px", border: "1px solid #dee2e6" }}>
+                  <td className="table-cell amount-cell">
                     ${order.amount.toFixed(2)}
                   </td>
-                  <td style={{ padding: "12px", border: "1px solid #dee2e6" }}>
-                    <span style={{ 
-                      color: getStatusColor(order.status),
-                      fontWeight: "bold",
-                      textTransform: "capitalize"
-                    }}>
+                  <td className="table-cell">
+                    <span className={getStatusClass(order.status)}>
                       {order.status}
                     </span>
                   </td>
-                  <td style={{ padding: "12px", border: "1px solid #dee2e6", fontSize: "12px" }}>
+                  <td className="table-cell timestamp-cell">
                     {formatTimestamp(order.timestamp)}
-                  </td>
-                  <td style={{ padding: "12px", border: "1px solid #dee2e6" }}>
-                    <div style={{ display: "flex", gap: "5px", flexDirection: "column" }}>
-                      <button
-                        onClick={() => updateOrderStatus(order.receiptId, "paid")}
-                        disabled={order.status === "paid"}
-                        style={{ 
-                          padding: "4px 8px", 
-                          fontSize: "12px",
-                          backgroundColor: order.status === "paid" ? "#ccc" : "#28a745",
-                          color: "white",
-                          border: "none",
-                          borderRadius: "3px",
-                          cursor: order.status === "paid" ? "not-allowed" : "pointer"
-                        }}
-                      >
-                        Mark Paid
-                      </button>
-                      <button
-                        onClick={() => updateOrderStatus(order.receiptId, "failed")}
-                        disabled={order.status === "failed"}
-                        style={{ 
-                          padding: "4px 8px", 
-                          fontSize: "12px",
-                          backgroundColor: order.status === "failed" ? "#ccc" : "#dc3545",
-                          color: "white",
-                          border: "none",
-                          borderRadius: "3px",
-                          cursor: order.status === "failed" ? "not-allowed" : "pointer"
-                        }}
-                      >
-                        Mark Failed
-                      </button>
-                    </div>
                   </td>
                 </tr>
               ))}
@@ -264,15 +153,15 @@ export function StatusPage() {
           </table>
           
           {filteredOrders.length === 0 && !loading && (
-            <div style={{ textAlign: "center", padding: "40px", color: "#6c757d" }}>
+            <div className="empty-state">
               {searchTerm ? "No orders found matching your search." : "No orders found."}
             </div>
           )}
         </div>
       )}
       
-      <div style={{ marginTop: "20px", fontSize: "12px", color: "#6c757d", textAlign: "center" }}>
-        Showing {filteredOrders.length} of {orders.length} orders • Auto-refreshes every 30 seconds
+      <div className="footer-info">
+        Showing {filteredOrders.length} of {orderHistory.length} orders • Auto-refreshes every 30 seconds
       </div>
     </div>
   );
