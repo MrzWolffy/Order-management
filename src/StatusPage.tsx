@@ -4,12 +4,10 @@ import "./App.css";
 
 interface OrderHistoryItem {
   receiptId: string;
-  orderId: string;
   products: string;
   amount: number;
   status: string;
   timestamp: string;
-  url: string;
 }
 
 export function StatusPage() {
@@ -37,19 +35,17 @@ export function StatusPage() {
       const data = await response.json();
       const rawData = data.data.values || [];
       
-      // Parse the data (columns: ReceiptId, OrderId, Products, Amount, Status, Timestamp, URL)
+      // Parse the filtered data (columns: ReceiptId, Products, Amount, Status, Timestamp)
       const parsedOrders: OrderHistoryItem[] = rawData
         .slice(1) // Skip header row
         .map((row: string[]) => ({
           receiptId: row[0] || "",
-          orderId: row[1] || "",
-          products: row[2] || "",
-          amount: parseFloat(row[3]) || 0,
-          status: row[4] || "",
-          timestamp: row[5] || "",
-          url: row[6] || "",
+          products: row[1] || "",
+          amount: parseFloat(row[2]) || 0,
+          status: row[3] || "",
+          timestamp: row[4] || "",
         }))
-        .sort((a: { timestamp: string | number | Date; }, b: { timestamp: string | number | Date; }) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()); // Sort by newest first
+        .sort((a: { timestamp: string }, b: { timestamp: string }) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()); // Sort by newest first
       
       setOrders(parsedOrders);
       setFilteredOrders(parsedOrders);
@@ -77,11 +73,10 @@ export function StatusPage() {
       
       // Update local state
       const updatedOrders = orders.map(order => 
-        order.orderId === orderId ? { ...order, status: newStatus } : order
+        order.receiptId === orderId ? { ...order, status: newStatus } : order
       );
       setOrders(updatedOrders);
       setFilteredOrders(updatedOrders.filter(order => 
-        order.orderId.toLowerCase().includes(searchTerm.toLowerCase()) ||
         order.receiptId.toLowerCase().includes(searchTerm.toLowerCase()) ||
         order.products.toLowerCase().includes(searchTerm.toLowerCase())
       ));
@@ -97,7 +92,6 @@ export function StatusPage() {
       setFilteredOrders(orders);
     } else {
       const filtered = orders.filter(order => 
-        order.orderId.toLowerCase().includes(term.toLowerCase()) ||
         order.receiptId.toLowerCase().includes(term.toLowerCase()) ||
         order.products.toLowerCase().includes(term.toLowerCase())
       );
@@ -154,7 +148,7 @@ export function StatusPage() {
       <div style={{ marginBottom: "20px", display: "flex", gap: "10px", alignItems: "center" }}>
         <input 
           type="text" 
-          placeholder="Search by Order ID, Receipt ID, or Product Name" 
+          placeholder="Search by Receipt ID or Product Name" 
           value={searchTerm}
           onChange={(e) => handleSearch(e.target.value)}
           style={{ 
@@ -194,25 +188,18 @@ export function StatusPage() {
             <thead>
               <tr style={{ backgroundColor: "#f8f9fa" }}>
                 <th style={{ padding: "12px", border: "1px solid #dee2e6", textAlign: "left" }}>Receipt ID</th>
-                <th style={{ padding: "12px", border: "1px solid #dee2e6", textAlign: "left" }}>Order ID</th>
                 <th style={{ padding: "12px", border: "1px solid #dee2e6", textAlign: "left" }}>Products</th>
                 <th style={{ padding: "12px", border: "1px solid #dee2e6", textAlign: "left" }}>Amount</th>
                 <th style={{ padding: "12px", border: "1px solid #dee2e6", textAlign: "left" }}>Status</th>
                 <th style={{ padding: "12px", border: "1px solid #dee2e6", textAlign: "left" }}>Timestamp</th>
-                <th style={{ padding: "12px", border: "1px solid #dee2e6", textAlign: "left" }}>URL</th>
                 <th style={{ padding: "12px", border: "1px solid #dee2e6", textAlign: "left" }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {filteredOrders.map((order, index) => (
-                <tr key={order.orderId} style={{ backgroundColor: index % 2 === 0 ? "#f8f9fa" : "white" }}>
+                <tr key={order.receiptId} style={{ backgroundColor: index % 2 === 0 ? "#f8f9fa" : "white" }}>
                   <td style={{ padding: "12px", border: "1px solid #dee2e6" }}>{order.receiptId}</td>
-                  <td style={{ padding: "12px", border: "1px solid #dee2e6" }}>
-                    <div style={{ fontSize: "12px", fontFamily: "monospace" }}>
-                      {order.orderId}
-                    </div>
-                  </td>
-                  <td style={{ padding: "12px", border: "1px solid #dee2e6", maxWidth: "200px" }}>
+                  <td style={{ padding: "12px", border: "1px solid #dee2e6", maxWidth: "300px" }}>
                     <div style={{ 
                       overflow: "hidden", 
                       textOverflow: "ellipsis", 
@@ -237,24 +224,10 @@ export function StatusPage() {
                   <td style={{ padding: "12px", border: "1px solid #dee2e6", fontSize: "12px" }}>
                     {formatTimestamp(order.timestamp)}
                   </td>
-                  <td style={{ padding: "12px", border: "1px solid #dee2e6", fontSize: "12px" }}>
-                    {order.url ? (
-                      <a 
-                        href={order.url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        style={{ color: "#007bff", textDecoration: "none" }}
-                      >
-                        View Link
-                      </a>
-                    ) : (
-                      "N/A"
-                    )}
-                  </td>
                   <td style={{ padding: "12px", border: "1px solid #dee2e6" }}>
                     <div style={{ display: "flex", gap: "5px", flexDirection: "column" }}>
                       <button
-                        onClick={() => updateOrderStatus(order.orderId, "paid")}
+                        onClick={() => updateOrderStatus(order.receiptId, "paid")}
                         disabled={order.status === "paid"}
                         style={{ 
                           padding: "4px 8px", 
@@ -269,7 +242,7 @@ export function StatusPage() {
                         Mark Paid
                       </button>
                       <button
-                        onClick={() => updateOrderStatus(order.orderId, "failed")}
+                        onClick={() => updateOrderStatus(order.receiptId, "failed")}
                         disabled={order.status === "failed"}
                         style={{ 
                           padding: "4px 8px", 
