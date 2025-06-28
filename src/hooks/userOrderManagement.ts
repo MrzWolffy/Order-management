@@ -67,7 +67,7 @@ export function useOrderManagement() {
   }
   
   const totalInfo = `\n${discountInfo}\n💵 Total: $${totals.total.toFixed(2)}`;
-  const orderInfo = orderId ? `\n📄 Order ID: ${orderId}` : "";
+  const orderInfo = orderId ? `\n📄 Receipt ID: ${orderId}` : "";
   
   return `${orderInfo}\n🛒 Products:\n${productInfo}${totalInfo}\n✅ Order confirmed!\n🔗 Checkout: ${sessionUrl}`;
 };
