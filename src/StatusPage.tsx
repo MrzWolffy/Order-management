@@ -83,10 +83,11 @@ export function StatusPage() {
 
   return (
     <div className="status-page">
-      <div className="status-header">
-        <button onClick={() => navigate("/")} className="navigate-button">
+      <button onClick={() => navigate("/")} className="navigateButtons">
           Order
         </button>
+      <div className="status-header">
+        
         <h1 className="status-title">Order Status Management</h1>
         <button onClick={fetchOrderHistory} className="refresh-button">
           Refresh
