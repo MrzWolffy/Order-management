@@ -40,6 +40,18 @@ export async function readSheet() {
   return response.json();
 }
 
+export async function readStatus() {
+  const response = await fetch(`${API_BASE_URL}/status`, {
+    method: "POST",
+    headers: { 
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${getJWT()}`
+    },
+  });
+  if (!response.ok) throw new Error("Failed to read status sheet");
+  return response.json();
+}
+
 export async function updateStock(id: string, quantity: number) {
   const response = await fetch(`${API_BASE_URL}/updateStock`, {
     method: "POST",
@@ -47,6 +59,19 @@ export async function updateStock(id: string, quantity: number) {
     body: JSON.stringify({ id, quantity }),
   });
   if (!response.ok) throw new Error("Failed to update stock");
+  return response.json();
+}
+
+export async function updateOrderStatus(orderId: string, status: "paid" | "failed" | "pending") {
+  const response = await fetch(`${API_BASE_URL}/updateOrderStatus`, {
+    method: "POST",
+    headers: { 
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${getJWT()}`
+    },
+    body: JSON.stringify({ orderId, status }),
+  });
+  if (!response.ok) throw new Error("Failed to update order status");
   return response.json();
 }
 
