@@ -36,10 +36,15 @@ export function ProductSearch({
     sheetData.values
       .slice(1) // Skip header
       .forEach((row: string[]) => {
+        const productId = row[0]?.toLowerCase() || "";
         const productName = row[1]?.toLowerCase() || "";
-        if (productName.includes(search.toLowerCase())) {
+        const searchTerm = search.toLowerCase();
+        
+        // Search by both product ID and product name
+        if (productId.includes(searchTerm) || productName.includes(searchTerm)) {
           const currentStock = parseInt(row[4] || "0", 10);
           if (currentStock > 0) {
+            // Group by product name to handle variants
             if (!productGroups[productName]) {
               productGroups[productName] = [];
             }
