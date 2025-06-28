@@ -197,8 +197,8 @@
 }
 
 .status-expired {
-  color: #5e5e5e;
-  background-color: #fff3cd;
+  color: #333333;
+  background-color: #5e5e5e;
 }
 
 .status-default {
