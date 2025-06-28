@@ -167,3 +167,5 @@ export function StatusPage() {
     </div>
   );
 }
+
+export default StatusPage;
