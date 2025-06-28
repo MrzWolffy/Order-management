@@ -69,6 +69,7 @@ export function StatusPage() {
     switch (status.toLowerCase()) {
       case "paid": return "status-badge status-paid";
       case "failed": return "status-badge status-failed";
+      case "expired": return "status-badge status-expired";
       case "pending": return "status-badge status-pending";
       default: return "status-badge status-default";
     }

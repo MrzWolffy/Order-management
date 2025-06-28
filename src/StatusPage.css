@@ -196,6 +196,11 @@
   background-color: #fff3cd;
 }
 
+.status-expired {
+  color: #5e5e5e;
+  background-color: #fff3cd;
+}
+
 .status-default {
   color: #495057;
   background-color: #e9ecef;
