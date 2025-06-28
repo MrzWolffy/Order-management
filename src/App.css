@@ -427,3 +427,37 @@
   left: auto;
   right: 16px;
 }
+
+.option-btn {
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  padding: 0.5em 0.5em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.25s;
+  background-color: #fff;
+  color: #000;
+}
+.option-btn:hover {
+  background-color: #f0f0f0;
+}
+
+.discount-input-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 1em 0;
+}
+
+.discount-input-container .search-box {
+  flex: 1;
+  margin: 0;
+  min-width: 0; /* Allow input to shrink */
+}
+
+.discount-input-container .option-btn {
+  flex-shrink: 0; /* Prevent dropdown from shrinking */
+  margin: 0;
+}

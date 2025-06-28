@@ -42,37 +42,36 @@ export function CreateDiscount({ onDiscountChange }: CreateDiscountProps) {
   };
 
   return (
-    <fieldset className="product-container">
+     <fieldset className="product-container">
       <legend>Create Discount</legend>
       <form onSubmit={(e) => e.preventDefault()}>
-        <label>
-          Discount Amount
+        <div className="discount-input-container">
           <input 
             type="number" 
             name="discountAmount" 
             value={discountAmount || ""}
             onChange={handleDiscountAmountChange}
             min="0"
-            step="0.01"
+            step="1"
             placeholder="Enter discount amount"
+            className="search-box"
           />
-        </label>
-        <select 
-          name="type" 
-          id="type" 
-          value={discountType}
-          onChange={handleDiscountTypeChange}
-        >
-          <option value="%">%</option>
-          <option value="$">$</option>
-        </select>
-        <br />
-        <br />
+          <select 
+            name="type" 
+            id="type" 
+            value={discountType}
+            onChange={handleDiscountTypeChange}
+            className="option-btn"
+          >
+            <option value="%">%</option>
+            <option value="$">$</option>
+          </select>
+        </div>
+        
         {discountAmount > 0 && (
           <button 
             type="button" 
             onClick={handleClearDiscount}
-            style={{ marginLeft: "10px" }}
           >
             Clear Discount
           </button>
