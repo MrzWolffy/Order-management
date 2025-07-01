@@ -87,6 +87,9 @@ export function StatusPage() {
       <button onClick={() => navigate("/")} className="navigateButtons">
           Order
         </button>
+      <button onClick={() => navigate("/analyte")} className="navigateButtons">
+        Analyte
+      </button>
       <div className="status-header">
         
         <h1 className="status-title">Order Status Management</h1>

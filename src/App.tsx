@@ -71,6 +71,9 @@ function App() {
       <button onClick={() => navigate("/status")} className="navigateButtons">
         Status
       </button>
+      <button onClick={() => navigate("/analyte")} className="navigateButtons">
+        Analyte
+      </button>
       <div className="container">
         <AuthSection
           isAuthorized={isAuthorized}
