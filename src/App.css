@@ -428,6 +428,13 @@
   right: 16px;
 }
 
+.navigateButtons2 {
+  position: absolute;
+  top: 16px;
+  left: auto;
+  right: 106px;
+}
+
 .option-btn {
   border-radius: 8px;
   border: 1px solid #ddd;

@@ -71,7 +71,7 @@ function App() {
       <button onClick={() => navigate("/status")} className="navigateButtons">
         Status
       </button>
-      <button onClick={() => navigate("/analyte")} className="navigateButtons">
+      <button onClick={() => navigate("/analyte")} className="navigateButtons2">
         Analyte
       </button>
       <div className="container">
