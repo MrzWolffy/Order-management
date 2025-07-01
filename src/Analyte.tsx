@@ -1,5 +1,5 @@
 //Analyte page
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { readSummary } from "./Api/sheetApi"; // <-- ปรับ path ตามจริง
 
 export default function AnalytePage() {
