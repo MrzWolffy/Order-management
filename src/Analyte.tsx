@@ -17,15 +17,19 @@ export default function AnalytePage() {
     async function fetchSummary() {
       try {
         const result = await readSummary();
+        console.log("Fetched summary:", result.data);
         const dailyArray = Object.entries(result.data.daily).map(([date, total]) => ({
         date,
         total: total as number,
         }));
 
-                const monthlyArray = Object.entries(result.data.monthly).map(([month, total]) => ({
+        const monthlyArray = Object.entries(result.data.monthly).map(([month, total]) => ({
         month,
         total: Number(total),
         }));
+
+        console.log("Daily summary:", dailyArray);
+        console.log("Monthly summary:", monthlyArray);
 
 
         setDaily(dailyArray);
