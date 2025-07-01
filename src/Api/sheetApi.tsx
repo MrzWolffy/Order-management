@@ -52,6 +52,18 @@ export async function readStatus() {
   return response.json();
 }
 
+export async function readSummary() {
+  const response = await fetch(`${API_BASE_URL}/summary`, {
+    method: "POST",
+    headers: { 
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${getJWT()}`
+    },
+  });
+  if (!response.ok) throw new Error("Failed to read status sheet");
+  return response.json();
+}
+
 export async function updateStock(id: string, quantity: number) {
   const response = await fetch(`${API_BASE_URL}/updateStock`, {
     method: "POST",
