@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import type { OrderHistoryItem } from "./types";
 import { useSheetApi } from "./hooks/useSheetApi";
 import "./StatusPage.css";
+import "./App.css";
 
 export function StatusPage() {
   const navigate = useNavigate();
