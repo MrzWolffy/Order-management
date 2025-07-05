@@ -42,7 +42,7 @@ export function ProductSearch({
         
         // Search by both product ID and product name
         if (productId.includes(searchTerm) || productName.includes(searchTerm)) {
-          const currentStock = parseInt(row[5] || "0", 10);
+          const currentStock = parseInt(row[4] || "0", 10);
           if (currentStock > 0) {
             // Group by product name to handle variants
             if (!productGroups[productName]) {
