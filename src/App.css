@@ -169,10 +169,12 @@
   
   .product-title {
     overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    flex-shrink: 1;
-    max-width: 150px; 
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+  padding-right: 8px;
+    min-width: unset;
     width: 100%;
     font-weight: bold;
     margin-bottom: 4px;
