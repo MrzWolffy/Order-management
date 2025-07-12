@@ -13,6 +13,10 @@ export async function authorize() {
     },
   });
   if (!response.ok) throw new Error("Failed to authorize");
+  if (response.status === 401) {
+    localStorage.removeItem('jwt'); // Clear JWT if unauthorized
+    throw new Error("Unauthorized");
+  }
   return response.json();
 }
 
