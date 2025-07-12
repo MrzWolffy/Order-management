@@ -171,7 +171,8 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    min-width: unset;
+    flex-shrink: 1;
+    max-width: 150px; 
     width: 100%;
     font-weight: bold;
     margin-bottom: 4px;
