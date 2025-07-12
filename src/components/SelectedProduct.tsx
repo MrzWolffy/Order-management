@@ -15,6 +15,7 @@ export function SelectedProducts({ selectedProducts, sheetData, onDeleteProduct 
     for (const [, productData] of Object.entries(selectedProducts)) {
       const { row: productRow, quantity: orderedQuantity } = productData;
       const [productCode, productName] = productRow;
+      console.log(`Checking stock for ${productName} (${productCode}) with ordered quantity: ${orderedQuantity}`);
       
       const rowIndex = sheetData.values.findIndex((sheetRow: string[], index: number) => {
         if (index === 0) return false;
@@ -22,7 +23,8 @@ export function SelectedProducts({ selectedProducts, sheetData, onDeleteProduct 
       });
       
       if (rowIndex !== -1) {
-        const currentQuantity = parseInt(sheetData.values[rowIndex][3] || "0", 10);
+        const currentQuantity = parseInt(sheetData.values[rowIndex][4] || "0", 10);
+        console.log(`Current stock for ${productName} (${productCode}): ${currentQuantity}`);
         if (currentQuantity < orderedQuantity) {
           issues.push(`${productName} (${productCode}): out of stock.`);
         }
@@ -51,6 +53,7 @@ export function SelectedProducts({ selectedProducts, sheetData, onDeleteProduct 
             });
             if (rowIndex !== -1) {
               currentStock = parseInt(sheetData.values[rowIndex][4] || "0", 10);
+              console.log(`Current stock for ${data.row[0]} ${data.row[1]}: ${currentStock}`);
             }
           }
           

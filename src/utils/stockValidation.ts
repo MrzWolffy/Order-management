@@ -18,7 +18,7 @@ export function validateStock(
     });
     
     if (rowIndex !== -1) {
-      const currentQuantity = parseInt(sheetData.values[rowIndex][3] || "0", 10);
+      const currentQuantity = parseInt(sheetData.values[rowIndex][4] || "0", 10);
       if (currentQuantity < orderedQuantity) {
         issues.push(`${productName} (${productCode}): out of stock.`);
       }
