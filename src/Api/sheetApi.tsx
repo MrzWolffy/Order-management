@@ -4,74 +4,76 @@ export function getJWT() {
   return localStorage.getItem('jwt') || '';
 }
 
-export async function authorize() {
-  const response = await fetch(`${API_BASE_URL}/authorize`, {
-    method: "GET",
-    headers: { 
+export function clearJWT() {
+  localStorage.removeItem('jwt');
+}
+
+// Helper function to handle token expiration
+function handleTokenExpiration() {
+  clearJWT();
+  // Redirect to login or refresh the page to show login state
+  window.location.reload();
+}
+
+// Enhanced fetch function that handles token expiration
+async function apiRequest(url: string, options: RequestInit = {}) {
+  const response = await fetch(url, {
+    ...options,
+    headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${getJWT()}`
+      "Authorization": `Bearer ${getJWT()}`,
+      ...options.headers,
     },
   });
-  if (!response.ok) throw new Error("Failed to authorize");
+
+  // Check if token is expired or unauthorized
+  if (response.status === 401) {
+    handleTokenExpiration();
+    throw new Error("Session expired. Please login again.");
+  }
+
+  if (!response.ok) {
+    throw new Error(`Request failed: ${response.statusText}`);
+  }
+
   return response.json();
+}
+
+export async function authorize() {
+  return apiRequest(`${API_BASE_URL}/authorize`, {
+    method: "GET",
+  });
 }
 
 export async function first_authorize() {
-  const response = await fetch(`${API_BASE_URL}/public-auth-url`, {
+  return apiRequest(`${API_BASE_URL}/public-auth-url`, {
     method: "GET",
-    headers: { 
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${getJWT()}`
-    },
   });
-  if (!response.ok) throw new Error("Failed to authorize");
-  return response.json();
 }
 
 export async function readSheet() {
-  const response = await fetch(`${API_BASE_URL}/readSheet`, {
+  return apiRequest(`${API_BASE_URL}/readSheet`, {
     method: "POST",
-    headers: { 
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${getJWT()}`
-    },
   });
-  if (!response.ok) throw new Error("Failed to read sheet");
-  return response.json();
 }
 
 export async function readStatus() {
-  const response = await fetch(`${API_BASE_URL}/status`, {
+  return apiRequest(`${API_BASE_URL}/status`, {
     method: "POST",
-    headers: { 
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${getJWT()}`
-    },
   });
-  if (!response.ok) throw new Error("Failed to read status sheet");
-  return response.json();
 }
 
 export async function readSummary() {
-  const response = await fetch(`${API_BASE_URL}/summary`, {
+  return apiRequest(`${API_BASE_URL}/summary`, {
     method: "POST",
-    headers: { 
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${getJWT()}`
-    },
   });
-  if (!response.ok) throw new Error("Failed to read status sheet");
-  return response.json();
 }
 
 export async function updateStock(id: string, quantity: number) {
-  const response = await fetch(`${API_BASE_URL}/updateStock`, {
+  return apiRequest(`${API_BASE_URL}/updateStock`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" ,"Authorization": `Bearer ${getJWT()}`},
     body: JSON.stringify({ id, quantity }),
   });
-  if (!response.ok) throw new Error("Failed to update stock");
-  return response.json();
 }
 
 export async function createUrl(
@@ -89,11 +91,9 @@ export async function createUrl(
       type: discount.type
     });
   }
-  const response = await fetch(`${API_BASE_URL}/sessionUrl`, {
+
+  return apiRequest(`${API_BASE_URL}/sessionUrl`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" , "Authorization": `Bearer ${getJWT()}`},
     body: JSON.stringify(requestBody),
   });
-  if (!response.ok) throw new Error("Failed to create session URL");
-  return response.json();
 }
