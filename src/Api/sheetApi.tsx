@@ -4,26 +4,6 @@ export function getJWT() {
   return localStorage.getItem('jwt') || '';
 }
 
-export function clearJWT() {
-  localStorage.removeItem('jwt');
-}
-
-async function handleApiResponse(response: Response) {
-  if (response.status === 401) {
-    // Token expired or invalid
-    clearJWT();
-    // Trigger a re-authentication by reloading the page or redirecting
-    window.location.reload();
-    throw new Error("Session expired. Please login again.");
-  }
-  
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-  
-  return response.json();
-}
-
 export async function authorize() {
   const response = await fetch(`${API_BASE_URL}/authorize`, {
     method: "GET",
@@ -32,7 +12,8 @@ export async function authorize() {
       "Authorization": `Bearer ${getJWT()}`
     },
   });
-  return handleApiResponse(response);
+  if (!response.ok) throw new Error("Failed to authorize");
+  return response.json();
 }
 
 export async function first_authorize() {
@@ -43,7 +24,8 @@ export async function first_authorize() {
       "Authorization": `Bearer ${getJWT()}`
     },
   });
-  return handleApiResponse(response);
+  if (!response.ok) throw new Error("Failed to authorize");
+  return response.json();
 }
 
 export async function readSheet() {
