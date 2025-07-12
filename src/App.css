@@ -168,6 +168,9 @@
   }
   
   .product-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     min-width: unset;
     width: 100%;
     font-weight: bold;
